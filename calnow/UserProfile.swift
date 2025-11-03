@@ -3,8 +3,8 @@ import Foundation
 
 @Model
 final class UserProfile {
-// TODO: key string?
-    var key: String = "UserProfileSingletonV1"
+    
+    var key: String = "UserProfileSingleton"
     
     enum Sex: String, Codable, CaseIterable, Identifiable {
         case male = "Мужской"
