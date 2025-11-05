@@ -25,8 +25,8 @@ struct calnowApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            OnboardingView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: UserProfile.self)
     }
 }

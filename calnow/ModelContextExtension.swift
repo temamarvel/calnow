@@ -35,11 +35,10 @@ extension ModelContext {
         return created
     }
     
-    func updateUserProfile(_ update: (UserProfile) -> Void) throws -> UserProfile {
+    func updateUserProfile(_ update: (UserProfile) -> Void) throws -> Void {
         let profile = try getUserProfile()
         update(profile)
         profile.updatedAt = .now
         try save()
-        return profile
     }
 }
