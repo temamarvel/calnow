@@ -122,4 +122,38 @@ final class HealthKitManager: HealthKitServicing {
 
         return (calculatedAge, userSex)
     }
+    
+    /// Сумма активной энергии за календарные сутки «сегодня» в ккал.
+    func fetchActiveEnergyToday() async throws -> Double {
+        try await sumEnergyToday(for: .activeEnergyBurned)
+    }
+    
+    /// Сумма базальной энергии за календарные сутки «сегодня» в ккал.
+    func fetchBasalEnergyToday() async throws -> Double {
+        try await sumEnergyToday(for: .basalEnergyBurned)
+    }
+    
+    // MARK: - Внутренняя утилита
+    
+    private func sumEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double {
+        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return 0 }
+        
+        // границы сегодняшнего дня по локальному календарю/таймзоне
+        let now = Date()
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        let predicate = HKSamplePredicate.quantitySample(
+            type: type,
+            predicate: HKQuery.predicateForSamples(withStart: startOfDay, end: now)
+        )
+        
+        // iOS 17+: типобезопасный дескриптор статистики с суммой
+        let statsDescriptor = HKStatisticsQueryDescriptor(
+            predicate: predicate,
+            options: .cumulativeSum
+        )
+        
+        let stats = try await statsDescriptor.result(for: healthStore)
+        let kcal = stats?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        return kcal
+    }
 }

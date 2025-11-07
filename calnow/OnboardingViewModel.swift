@@ -226,4 +226,6 @@ protocol HealthKitServicing: AnyObject {
     func fetchLatestWeight() async throws -> Double?     // кг
     func fetchLatestHeight() async throws -> Double?     // см
     func fetchDOBandSex() throws -> (age: Int?, sex: UserProfile.Sex?)
+    func fetchActiveEnergyToday() async throws -> Double
+    func fetchBasalEnergyToday() async throws -> Double
 }

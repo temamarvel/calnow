@@ -168,111 +168,12 @@ private struct ToastView: View {
 
 // MARK: - Превью с мок-сервисом и in-memory SwiftData
 #Preview {
-    // 1) Мок HealthKit
-    final class HealthKitMock: HealthKitServicing {
-        
-        // MARK: - Публичные настройки мока
-        
-        /// Считаем ли, что доступ уже разрешён.
-        /// Имитируется через requestAuthorization()
-        private(set) var isAuthorized: Bool
-        
-        /// Возвращаемые значения (nil означает "данных нет")
-        var mockWeightKg: Double?
-        var mockHeightCm: Double?
-        var mockAgeYears: Int?
-        var mockSex: UserProfile.Sex?
-        
-        /// Имитируем задержку ответа (для ближе к реальности)
-        var simulatedDelay: TimeInterval = 0.0
-        
-        /// Настроить, чтобы методы бросали ошибку (например, для проверки обработки ошибок в VM)
-        var shouldFailAuthorization = false
-        var shouldFailWeight = false
-        var shouldFailHeight = false
-        var shouldFailDOBSex = false
-        
-        // MARK: - Инициализация
-        
-        init(
-            isAuthorized: Bool = true,
-            weightKg: Double? = 90,
-            heightCm: Double? = 185,
-            ageYears: Int? = 35,
-            sex: UserProfile.Sex? = .male,
-            simulatedDelay: TimeInterval = 0.0
-        ) {
-            self.isAuthorized = isAuthorized
-            self.mockWeightKg = weightKg
-            self.mockHeightCm = heightCm
-            self.mockAgeYears = ageYears
-            self.mockSex = sex
-            self.simulatedDelay = simulatedDelay
-        }
-        
-        // Удобные пресеты
-        static var demoMale: HealthKitMock {
-            HealthKitMock(isAuthorized: true, weightKg: 90, heightCm: 185, ageYears: 35, sex: .male)
-        }
-        
-        static var demoFemale: HealthKitMock {
-            HealthKitMock(isAuthorized: true, weightKg: 62, heightCm: 170, ageYears: 29, sex: .female)
-        }
-        
-        // MARK: - HealthKitServicing
-        
-        func requestAuthorization() async {
-            // Имитируем задержку + успех/ошибку
-            if simulatedDelay > 0 { try? await Task.sleep(nanoseconds: UInt64(simulatedDelay * 1_000_000_000)) }
-            
-            if shouldFailAuthorization {
-                await MainActor.run { self.isAuthorized = false }
-                return
-            }
-            await MainActor.run { self.isAuthorized = true }
-        }
-        
-        func fetchLatestWeight() async throws -> Double? {
-            if simulatedDelay > 0 { try await Task.sleep(nanoseconds: UInt64(simulatedDelay * 1_000_000_000)) }
-            if shouldFailWeight { throw MockError.failedToFetchWeight }
-            return mockWeightKg
-        }
-        
-        func fetchLatestHeight() async throws -> Double? {
-            if simulatedDelay > 0 { try await Task.sleep(nanoseconds: UInt64(simulatedDelay * 1_000_000_000)) }
-            if shouldFailHeight { throw MockError.failedToFetchHeight }
-            return mockHeightCm
-        }
-        
-        func fetchDOBandSex() throws -> (age: Int?, sex: UserProfile.Sex?) {
-            if shouldFailDOBSex { throw MockError.failedToFetchDOBSex }
-            return (mockAgeYears, mockSex)
-        }
-        
-        // MARK: - Вспомогательное
-        
-        enum MockError: LocalizedError {
-            case failedToFetchWeight
-            case failedToFetchHeight
-            case failedToFetchDOBSex
-            
-            var errorDescription: String? {
-                switch self {
-                    case .failedToFetchWeight: return "Не удалось получить вес (мок)."
-                    case .failedToFetchHeight: return "Не удалось получить рост (мок)."
-                    case .failedToFetchDOBSex: return "Не удалось получить дату рождения/пол (мок)."
-                }
-            }
-        }
-    }
-    
     
     let schema = Schema([UserProfile.self])
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: schema, configurations: [config])
     
     // Собираем вью и подсовываем VM с мок-сервисом
-    let mock = HealthKitMock.demoMale
     let view = OnboardingView()
         .modelContainer(container)
     
