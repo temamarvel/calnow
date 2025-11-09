@@ -58,9 +58,10 @@ final class OnboardingViewModel: ObservableObject {
     /// Подготовить вью-модель значениями из уже сохранённого профиля (если есть)
     func loadExistingIfAny(from context: ModelContext) {
         do {
-            let p = try context.getUserProfile()
-            fill(from: p)
-            recalc()
+            if let p = try context.getExistedUserProfile(){
+                fill(from: p)
+                recalc()
+            }
         } catch {
             alertMessage = "Не удалось загрузить профиль: \(error.localizedDescription)"
         }

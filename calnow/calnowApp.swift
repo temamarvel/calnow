@@ -1,18 +1,23 @@
-//
-//  calnowApp.swift
-//  calnow
-//
-//  Created by Артем Денисов on 03.11.2025.
-//
-
 import SwiftUI
 import SwiftData
 
+struct RootView: View {
+    @Query private var profiles: [UserProfile]
+    
+    var body: some View {
+        if profiles.first != nil {
+            MainDashboardView()
+        } else {
+            OnboardingView()
+        }
+    }
+}
+
 @main
-struct calnowApp: App {
+struct CalNowApp: App {
     var body: some Scene {
         WindowGroup {
-            OnboardingView()
+            RootView()
         }
         .modelContainer(for: UserProfile.self)
     }
