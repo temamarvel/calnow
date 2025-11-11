@@ -3,10 +3,9 @@ import SwiftData
 
 struct RootView: View {
     @Query private var profiles: [UserProfile]
-    
     var body: some View {
         if profiles.first != nil {
-            MainDashboardView()
+            DashboardRootView() // ⬅️ теперь сюда
         } else {
             OnboardingView()
         }

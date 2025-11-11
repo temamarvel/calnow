@@ -33,6 +33,12 @@ final class HealthKitManager: HealthKitServicing {
         if let sex = HKObjectType.characteristicType(forIdentifier: .biologicalSex) {
             set.insert(sex)
         }
+        if let activeEnergyBurned = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) {
+            set.insert(activeEnergyBurned)
+        }
+        if let basalEnergyBurned = HKObjectType.quantityType(forIdentifier: .basalEnergyBurned) {
+            set.insert(basalEnergyBurned)
+        }
         return set
     }
 
@@ -47,9 +53,46 @@ final class HealthKitManager: HealthKitServicing {
         }
 
         do {
+            
+            
+            
+            
             try await healthStore.requestAuthorization(toShare: [], read: readTypes)
+            
+            let service = HealthAccessService(store: healthStore)
+            
+            let config = HealthReadConfig(
+                quantities: [
+                    .bodyMass,
+                    .height,
+                    .activeEnergyBurned,
+                    .basalEnergyBurned,
+                ],
+                categories: [ ],
+                characteristics: [
+                    .dateOfBirth, .biologicalSex
+                ],
+            )
+            
+            let result = await service.checkReadAccess(config: config)
+            
+            switch result.status {
+                case .none:
+                    print("Нет доступа ни к одному типу")
+                case .partial:
+                    print("Частичный доступ")
+                case .full:
+                    print("Полный доступ")
+            }
+            
+            // Список, что запрещено — удобно показать в UI:
+//            for t in result.denied {
+//                print("Нет доступа к: \(t.displayName)")
+//            }
+            
             await MainActor.run {
-                self.isAuthorized = true
+                
+                self.isAuthorized = result.status == .full
             }
         } catch {
             await MainActor.run {
@@ -155,5 +198,59 @@ final class HealthKitManager: HealthKitServicing {
         let stats = try await statsDescriptor.result(for: healthStore)
         let kcal = stats?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
         return kcal
+    }
+    
+    // helper: собрать дневную коллекцию по типу
+    private func dailyBuckets(
+        for id: HKQuantityTypeIdentifier,
+        in interval: DateInterval
+    ) async throws -> [(date: Date, kcal: Double)] {
+        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return [] }
+        let cal = Calendar.current
+        
+        let predicate = HKSamplePredicate.quantitySample(
+            type: type,
+            predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
+        )
+        
+        // суточные ведёрки
+        let statsDesc = HKStatisticsCollectionQueryDescriptor(
+            predicate: predicate,
+            options: .cumulativeSum,
+            anchorDate: cal.startOfDay(for: interval.start),
+            intervalComponents: DateComponents(day: 1)
+        )
+        
+        let collection = try await statsDesc.result(for: healthStore)
+        var result: [(Date, Double)] = []
+        collection.enumerateStatistics(from: interval.start, to: interval.end) { stats, _ in
+            let date = stats.startDate
+            let kcal = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+            result.append((date, kcal))
+        }
+        return result
+    }
+    
+    func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint] {
+        async let active = dailyBuckets(for: .activeEnergyBurned, in: interval)
+        async let basal  = dailyBuckets(for: .basalEnergyBurned,  in: interval)
+        
+        let (a, b) = try await (active, basal)
+        
+        // слить по дате
+        let byDateA = Dictionary(uniqueKeysWithValues: a.map { ($0.date, $0.kcal) })
+        let byDateB = Dictionary(uniqueKeysWithValues: b.map { ($0.date, $0.kcal) })
+        
+        // итерируем по дням интервала, чтобы были все дни (даже пустые)
+        var points: [DayEnergyPoint] = []
+        var day = Calendar.current.startOfDay(for: interval.start)
+        let end = interval.end
+        while day <= end {
+            let aVal = byDateA[day] ?? 0
+            let bVal = byDateB[day] ?? 0
+            points.append(DayEnergyPoint(date: day, activeKcal: aVal, basalKcal: bVal))
+            day = Calendar.current.date(byAdding: .day, value: 1, to: day)!
+        }
+        return points
     }
 }

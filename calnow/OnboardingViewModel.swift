@@ -229,4 +229,5 @@ protocol HealthKitServicing: AnyObject {
     func fetchDOBandSex() throws -> (age: Int?, sex: UserProfile.Sex?)
     func fetchActiveEnergyToday() async throws -> Double
     func fetchBasalEnergyToday() async throws -> Double
+    func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint]
 }
