@@ -344,7 +344,7 @@
 				3B29FB542EB8D45500803E22 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3B29FB552EB8D45500803E22 /* Build configuration list for PBXNativeTarget "calnow" */ = {
 			isa = XCConfigurationList;
@@ -353,7 +353,7 @@
 				3B29FB572EB8D45500803E22 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
