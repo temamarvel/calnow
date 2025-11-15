@@ -4,7 +4,7 @@ import SwiftData
 // MARK: - MainDashboardView (использует секции)
 struct MainDashboardView: View {
     @Environment(\.modelContext) private var modelContext
-    @StateObject private var vm = MainDashboardViewModel()
+    @StateObject var vm: MainDashboardViewModel
     
     var body: some View {
         NavigationStack {
@@ -135,19 +135,19 @@ struct TodaySectionView: View {
 //}
 
 // MARK: - Общее превью MainDashboardView с мок-данными
-#Preview("MainDashboard – Demo") {
-    // In-memory SwiftData
-    let schema = Schema([UserProfile.self])
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: schema, configurations: [config])
-    
-    // Единственный профиль
-//    let ctx = ModelContext(container)
-//    let p = UserProfile(sex: .male, age: 35, height: 185, weight: 90, activity: .moderate)
-//    p.key = "UserProfileSingletonV1"
-//    ctx.insert(p); try? ctx.save()
-    
-    MainDashboardView()
-        .modelContainer(container)
-        .environment(\.locale, .init(identifier: "ru_RU"))
-}
+//#Preview("MainDashboard – Demo") {
+//    // In-memory SwiftData
+//    let schema = Schema([UserProfile.self])
+//    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+//    let container = try! ModelContainer(for: schema, configurations: [config])
+//    
+//    // Единственный профиль
+////    let ctx = ModelContext(container)
+////    let p = UserProfile(sex: .male, age: 35, height: 185, weight: 90, activity: .moderate)
+////    p.key = "UserProfileSingletonV1"
+////    ctx.insert(p); try? ctx.save()
+//    
+//    MainDashboardContainer()
+//        .modelContainer(container)
+//        .environment(\.locale, .init(identifier: "ru_RU"))
+//}
