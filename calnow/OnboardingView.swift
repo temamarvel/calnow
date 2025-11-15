@@ -1,16 +1,29 @@
 import SwiftUI
 import SwiftData
 
+struct OnboardingContainer: View {
+    @EnvironmentObject private var hk : HealthKitManager
+    var body: some View {
+        OnboardingView(health: hk) // ← передаём зависимость
+    }
+}
+
 struct OnboardingView: View {
     // SwiftData
     @Environment(\.modelContext) private var modelContext
+    //@EnvironmentObject var healthKitManager: HealthKitManager
+    
+    init(health: HealthKitServicing) {
+        //_vm = StateObject(wrappedValue: OnboardingViewModel(health: health))
+        _vm = StateObject(wrappedValue: OnboardingViewModel(health: health))
+    }
     
     // VM
-    @StateObject private var vm = OnboardingViewModel()
+    @StateObject private var vm : OnboardingViewModel
     
     // UI
     @FocusState private var focusedField: Field?
-    
+        
     enum Field { case age, height, weight }
     
     var body: some View {
@@ -174,7 +187,7 @@ private struct ToastView: View {
     let container = try! ModelContainer(for: schema, configurations: [config])
     
     // Собираем вью и подсовываем VM с мок-сервисом
-    let view = OnboardingView()
+    let view = OnboardingContainer()
         .modelContainer(container)
     
     // Самый простой способ подменить VM — создать отдельный инициализатор у OnboardingView,

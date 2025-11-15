@@ -8,10 +8,12 @@
 
 import Foundation
 import HealthKit
+internal import Combine
+
 
 /// Реализация протокола HealthKitServicing.
 /// Используется в OnboardingViewModel для запроса доступа и импорта роста, веса, возраста и пола.
-final class HealthKitManager: HealthKitServicing {
+final class HealthKitManager: ObservableObject, HealthKitServicing {
 
     // MARK: - Private properties
 

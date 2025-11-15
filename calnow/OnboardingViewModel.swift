@@ -36,7 +36,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var alertMessage: String?             // для ошибок/алертов
 
     // MARK: - Зависимость
-    let health: HealthKitServicing
+    var health: HealthKitServicing
 
     // MARK: - Форматирование чисел с учётом локали
     private let nf: NumberFormatter = {
@@ -49,7 +49,7 @@ final class OnboardingViewModel: ObservableObject {
     }()
 
     // MARK: - Инициализация
-    init(health: HealthKitServicing = HealthKitManager()) {
+    init(health: HealthKitServicing) {
         self.health = health
     }
 

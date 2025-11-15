@@ -25,11 +25,13 @@ final class MainDashboardViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published var alertMessage: String?
 
-    private let health: HealthKitServicing
+    private var health: HealthKitServicing
 
-    init(health: HealthKitServicing = HealthKitManager()) {
+    init(health: HealthKitServicing) {
         self.health = health
     }
+    
+    
 
     func loadProfile(from context: ModelContext) {
         do {

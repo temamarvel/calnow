@@ -11,13 +11,29 @@ import SwiftData
 
 enum DashboardTab { case current, charts }
 
+
+struct DashboardRootContainer: View {
+    @EnvironmentObject private var hk : HealthKitManager
+    var body: some View {
+        DashboardRootView(health: hk) // ← передаём зависимость
+    }
+}
+
 struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var tab: DashboardTab = .current
+    
+    
+    init(health: HealthKitServicing) {
+        //_vm = StateObject(wrappedValue: OnboardingViewModel(health: health))
+        _currentVM = StateObject(wrappedValue: MainDashboardViewModel(health: health))
+        _chartsVM = StateObject(wrappedValue: EnergyChartsViewModel(health: health))
+        
+    }
 
     // VM’ки вкладок
-    @StateObject private var currentVM = MainDashboardViewModel()
-    @StateObject private var chartsVM  = EnergyChartsViewModel()
+    @StateObject private var currentVM: MainDashboardViewModel
+    @StateObject private var chartsVM: EnergyChartsViewModel
 
     var body: some View {
         NavigationStack {
@@ -43,7 +59,7 @@ struct DashboardRootView: View {
                     Button {
                         tab = .charts
                     } label: {
-                        Label("Графики", systemImage: "chart.line.uptrend.xyaxis")
+                        Label("Графики", systemImage: "chart.line.uptrend.:")
                             .fontWeight(tab == .charts ? .semibold : .regular)
                     }
                 }
