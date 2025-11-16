@@ -43,10 +43,10 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         }
         return set
     }
-
+    
     // MARK: - Инициализация
     init() {}
-
+    
     // MARK: - Авторизация HealthKit
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else {
@@ -55,47 +55,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         }
 
         do {
-            
-            
-            
-            
             try await healthStore.requestAuthorization(toShare: [], read: readTypes)
-            
-            let service = HealthAccessService(store: healthStore)
-            
-            let config = HealthReadConfig(
-                quantities: [
-                    .bodyMass,
-                    .height,
-                    .activeEnergyBurned,
-                    .basalEnergyBurned,
-                ],
-                categories: [ ],
-                characteristics: [
-                    .dateOfBirth, .biologicalSex
-                ],
-            )
-            
-            let result = await service.checkReadAccess(config: config)
-            
-            switch result.status {
-                case .none:
-                    print("Нет доступа ни к одному типу")
-                case .partial:
-                    print("Частичный доступ")
-                case .full:
-                    print("Полный доступ")
-            }
-            
-            // Список, что запрещено — удобно показать в UI:
-//            for t in result.denied {
-//                print("Нет доступа к: \(t.displayName)")
-//            }
-            
-            await MainActor.run {
-                
-                self.isAuthorized = result.status == .full
-            }
         } catch {
             await MainActor.run {
                 self.isAuthorized = false
