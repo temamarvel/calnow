@@ -161,9 +161,9 @@ final class OnboardingViewModel: ObservableObject {
                 heightText = nf.string(from: NSNumber(value: h)) ?? "\(h)"
             }
             // Возраст/пол
-            let (age, s) = try health.fetchDOBandSex()
-            if let s { sex = s }
-            if let age { ageText = "\(age)" }
+//            let (age, s) = try health.fetchDOBandSex()
+//            if let s { sex = s }
+//            if let age { ageText = "\(age)" }
 
             recalc()
             toastMessage = "Данные импортированы из Здоровья"
@@ -226,7 +226,8 @@ protocol HealthKitServicing: AnyObject {
     func requestAuthorization() async
     func fetchLatestWeight() async throws -> Double?     // кг
     func fetchLatestHeight() async throws -> Double?     // см
-    func fetchDOBandSex() throws -> (age: Int?, sex: Sex?)
+    func fetchSex() throws -> Sex?
+    func fetchAge() throws -> Int?
     func fetchActiveEnergyToday() async throws -> Double
     func fetchBasalEnergyToday() async throws -> Double
     func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint]

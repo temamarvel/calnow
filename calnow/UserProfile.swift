@@ -43,11 +43,12 @@ final class UserProfile {
     var updatedAt: Date
     
     init(
-        sex: Sex,
-        age: Int,
-        height: Double,
-        weight: Double,
-        activity: ActivityLevel,
+        //TODO: remove default values
+        sex: Sex = .male,
+        age: Int = 30,
+        height: Double = 170.0,
+        weight: Double = 80.0,
+        activity: ActivityLevel = .moderate,
         createdAt: Date = .now,
         updatedAt: Date = .now
     ) {

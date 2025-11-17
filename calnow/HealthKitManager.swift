@@ -127,6 +127,36 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
 
         return (calculatedAge, userSex)
     }
+
+    func fetchSex() throws -> Sex? {
+        var userSex: Sex?
+        
+        // Пол
+        if let bio = try? healthStore.biologicalSex() {
+            switch bio.biologicalSex {
+                case .male:   userSex = .male
+                case .female: userSex = .female
+                default: break
+            }
+        }
+        
+        return userSex
+    }
+    
+    func fetchAge() throws -> Int? {
+        var calculatedAge: Int?
+        
+        // Дата рождения
+        if let components = try? healthStore.dateOfBirthComponents(),
+           let birthDate = Calendar.current.date(from: components) {
+            let now = Date()
+            let ageComponents = Calendar.current.dateComponents([.year], from: birthDate, to: now)
+            calculatedAge = ageComponents.year
+        }
+        
+        return calculatedAge
+    }
+    
     
     /// Сумма активной энергии за календарные сутки «сегодня» в ккал.
     func fetchActiveEnergyToday() async throws -> Double {

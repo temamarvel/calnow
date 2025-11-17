@@ -67,11 +67,17 @@ struct OnboardingProfileStepView: View {
         .navigationTitle("Ваш профиль")
         .onAppear {
             //preloadExistingProfileIfAny()
+            importProfileFromHealthKit()
         }
     }
     
     private func importProfileFromHealthKit(){
-        //height = healthKitManager.fetchLatestHeight()
+        Task{
+            height = try await healthKitManager.fetchLatestHeight() ?? 0.0
+            weight = try await healthKitManager.fetchLatestWeight() ?? 0.0
+            age = try await healthKitManager.fetchAge() ?? 0
+            sex = try await healthKitManager.fetchSex() ?? .male
+        }
     }
 
     private func preloadExistingProfileIfAny() {
