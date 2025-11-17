@@ -104,9 +104,9 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     }
 
     // MARK: - Получение возраста и пола
-    func fetchDOBandSex() throws -> (age: Int?, sex: UserProfile.Sex?) {
+    func fetchDOBandSex() throws -> (age: Int?, sex: Sex?) {
         var calculatedAge: Int?
-        var userSex: UserProfile.Sex?
+        var userSex: Sex?
 
         // Дата рождения
         if let components = try? healthStore.dateOfBirthComponents(),

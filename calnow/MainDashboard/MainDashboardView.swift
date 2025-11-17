@@ -49,11 +49,11 @@ struct ProfileSectionView: View {
     var body: some View {
         Section("Профиль") {
             if let p = profile {
-                LabeledContent("Пол") { Text(p.sex.rawValue) }
+                LabeledContent("Пол") { Text(p.sex!.rawValue) }
                 LabeledContent("Возраст") { Text("\(p.age) лет") }
-                LabeledContent("Рост") { Text("\(Int(p.height)) см") }
-                LabeledContent("Вес") { Text(String(format: "%.1f кг", p.weight)) }
-                LabeledContent("Активность") { Text(p.activity.rawValue) }
+                LabeledContent("Рост") { Text("\(Int(p.height ?? 0)) см") }
+                LabeledContent("Вес") { Text(String(format: "%.1f кг", p.weight ?? 0)) }
+                LabeledContent("Активность") { Text(p.activity!.rawValue) }
             } else {
                 Text("Профиль не найден")
                     .foregroundStyle(.secondary)

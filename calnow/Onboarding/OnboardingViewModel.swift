@@ -15,11 +15,11 @@ internal import Combine
 final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Ввод пользователя (связан с TextField/Picker)
-    @Published var sex: UserProfile.Sex = .male
+    @Published var sex: Sex = .male
     @Published var ageText: String = ""          // держим строкой, чтобы удобно вводить
     @Published var heightText: String = ""       // см
     @Published var weightText: String = ""       // кг
-    @Published var activity: UserProfile.ActivityLevel = .moderate
+    @Published var activity: ActivityLevel = .moderate
 
     // MARK: - Вычисляемые для UI
     @Published private(set) var bmr: Double = 0
@@ -125,8 +125,8 @@ final class OnboardingViewModel: ObservableObject {
     func onAgeChanged(_ new: String)       { ageText = new;     recalc() }
     func onHeightChanged(_ new: String)    { heightText = new;  recalc() }
     func onWeightChanged(_ new: String)    { weightText = new;  recalc() }
-    func onSexChanged(_ new: UserProfile.Sex) { sex = new;      recalc() }
-    func onActivityChanged(_ new: UserProfile.ActivityLevel) { activity = new; recalc() }
+    func onSexChanged(_ new: Sex) { sex = new;      recalc() }
+    func onActivityChanged(_ new: ActivityLevel) { activity = new; recalc() }
 
     // MARK: - Приватные: HealthKit
 
@@ -212,11 +212,11 @@ final class OnboardingViewModel: ObservableObject {
 
     // MARK: - Заполнение из сохранённой модели
     private func fill(from p: UserProfile) {
-        sex = p.sex
-        activity = p.activity
-        ageText = "\(p.age)"
-        heightText = nf.string(from: NSNumber(value: p.height)) ?? "\(p.height)"
-        weightText = nf.string(from: NSNumber(value: p.weight)) ?? "\(p.weight)"
+//        sex = p.sex
+//        activity = p.activity
+//        ageText = "\(p.age)"
+//        heightText = nf.string(from: NSNumber(value: p.height)) ?? "\(p.height)"
+//        weightText = nf.string(from: NSNumber(value: p.weight)) ?? "\(p.weight)"
     }
 }
 
@@ -226,7 +226,7 @@ protocol HealthKitServicing: AnyObject {
     func requestAuthorization() async
     func fetchLatestWeight() async throws -> Double?     // кг
     func fetchLatestHeight() async throws -> Double?     // см
-    func fetchDOBandSex() throws -> (age: Int?, sex: UserProfile.Sex?)
+    func fetchDOBandSex() throws -> (age: Int?, sex: Sex?)
     func fetchActiveEnergyToday() async throws -> Double
     func fetchBasalEnergyToday() async throws -> Double
     func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint]

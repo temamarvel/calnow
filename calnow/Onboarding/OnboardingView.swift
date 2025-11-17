@@ -27,126 +27,127 @@ struct OnboardingView: View {
     enum Field { case age, height, weight }
     
     var body: some View {
-        NavigationStack {
-            Form {
-                // MARK: - Health
-                Section {
-                    HStack(spacing: 12) {
-                        Image(systemName: vm.hkAuthorized ? "checkmark.shield" : "exclamationmark.shield")
-                            .foregroundStyle(vm.hkAuthorized ? .green : .orange)
-                        Text(vm.hkAuthorized ? "Доступ к Здоровью разрешён" : "Нет доступа к Здоровью")
-                        Spacer(minLength: 12)
-                        if vm.isRequestingHK || vm.isImportingHK {
-                            ProgressView()
-                        }
-                        Button(vm.hkAuthorized ? "Импортировать" : "Разрешить") {
-                            if vm.hkAuthorized {
-                                vm.importFromHealthTapped()
-                            } else {
-                                vm.requestHealthAccessAndImport()
-                            }
-                        }
-                        .disabled(vm.isRequestingHK || vm.isImportingHK)
-                    }
-                } header: {
-                    Text("Синхронизация с Health")
-                } footer: {
-                    Text("Импортируем рост, вес и дату рождения. Тексты причин — в Info.plist: NSHealthShareUsageDescription / NSHealthUpdateUsageDescription.")
-                }
-                
-                // MARK: - Профиль
-                Section("Профиль") {
-                    Picker("Пол", selection: $vm.sex) {
-                        ForEach(UserProfile.Sex.allCases) { s in
-                            Text(s.rawValue).tag(s)
-                        }
-                    }
-                    .onChange(of: vm.sex) { _, new in vm.onSexChanged(new) }
-                    
-                    TextField("Возраст, лет", text: $vm.ageText)
-                        .keyboardType(.numberPad)
-                        .focused($focusedField, equals: .age)
-                        .onChange(of: vm.ageText) { _, new in vm.onAgeChanged(new) }
-                    
-                    TextField("Рост, см", text: $vm.heightText)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .height)
-                        .onChange(of: vm.heightText) { _, new in vm.onHeightChanged(new) }
-                    
-                    TextField("Вес, кг", text: $vm.weightText)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .weight)
-                        .onChange(of: vm.weightText) { _, new in vm.onWeightChanged(new) }
-                    
-                    Picker("Активность", selection: $vm.activity) {
-                        ForEach(UserProfile.ActivityLevel.allCases) { a in
-                            Text(a.rawValue).tag(a)
-                        }
-                    }
-                    .onChange(of: vm.activity) { _, new in vm.onActivityChanged(new) }
-                }
-                
-                // MARK: - Результат
-                Section("Результат") {
-                    HStack {
-                        Text("BMR (Миффлин—Сан Жеор)")
-                        Spacer()
-                        Text(vm.bmr > 0 ? "\(Int(vm.bmr)) ккал/день" : "—")
-                            .fontWeight(.semibold)
-                    }
-                    HStack {
-                        Text("TDEE (с учётом активности)")
-                        Spacer()
-                        Text(vm.tdee > 0 ? "\(Int(vm.tdee)) ккал/день" : "—")
-                            .fontWeight(.semibold)
-                    }
-                }
-            }
-            .navigationTitle("Ваши данные")
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Готово") { focusedField = nil }
-                }
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        focusedField = nil
-                        vm.save(to: modelContext)
-                    } label: {
-                        HStack {
-                            if vm.isSaving { ProgressView().padding(.trailing, 8) }
-                            Text("Сохранить и продолжить")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(maxWidth: .infinity)
-                    }
-                    .disabled(vm.isSaving)
-                }
-            }
-            .onAppear {
-                vm.loadExistingIfAny(from: modelContext)
-            }
-            // MARK: - Alerts
-            .alert("Сообщение", isPresented: Binding(
-                get: { vm.alertMessage != nil },
-                set: { if !$0 { vm.alertMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(vm.alertMessage ?? "")
-            }
-            // MARK: - Toast (простой)
-            .overlay(alignment: .top) {
-                if let text = vm.toastMessage {
-                    ToastView(text: text) {
-                        vm.toastMessage = nil
-                    }
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .padding(.top, 8)
-                }
-            }
-            .animation(.spring(duration: 0.3), value: vm.toastMessage)
-        }
+        Text("old onboarding!")
+//        NavigationStack {
+//            Form {
+//                // MARK: - Health
+//                Section {
+//                    HStack(spacing: 12) {
+//                        Image(systemName: vm.hkAuthorized ? "checkmark.shield" : "exclamationmark.shield")
+//                            .foregroundStyle(vm.hkAuthorized ? .green : .orange)
+//                        Text(vm.hkAuthorized ? "Доступ к Здоровью разрешён" : "Нет доступа к Здоровью")
+//                        Spacer(minLength: 12)
+//                        if vm.isRequestingHK || vm.isImportingHK {
+//                            ProgressView()
+//                        }
+//                        Button(vm.hkAuthorized ? "Импортировать" : "Разрешить") {
+//                            if vm.hkAuthorized {
+//                                vm.importFromHealthTapped()
+//                            } else {
+//                                vm.requestHealthAccessAndImport()
+//                            }
+//                        }
+//                        .disabled(vm.isRequestingHK || vm.isImportingHK)
+//                    }
+//                } header: {
+//                    Text("Синхронизация с Health")
+//                } footer: {
+//                    Text("Импортируем рост, вес и дату рождения. Тексты причин — в Info.plist: NSHealthShareUsageDescription / NSHealthUpdateUsageDescription.")
+//                }
+//                
+//                // MARK: - Профиль
+//                Section("Профиль") {
+//                    Picker("Пол", selection: $vm.sex) {
+//                        ForEach(UserProfile.Sex.allCases) { s in
+//                            Text(s.rawValue).tag(s)
+//                        }
+//                    }
+//                    .onChange(of: vm.sex) { _, new in vm.onSexChanged(new) }
+//                    
+//                    TextField("Возраст, лет", text: $vm.ageText)
+//                        .keyboardType(.numberPad)
+//                        .focused($focusedField, equals: .age)
+//                        .onChange(of: vm.ageText) { _, new in vm.onAgeChanged(new) }
+//                    
+//                    TextField("Рост, см", text: $vm.heightText)
+//                        .keyboardType(.decimalPad)
+//                        .focused($focusedField, equals: .height)
+//                        .onChange(of: vm.heightText) { _, new in vm.onHeightChanged(new) }
+//                    
+//                    TextField("Вес, кг", text: $vm.weightText)
+//                        .keyboardType(.decimalPad)
+//                        .focused($focusedField, equals: .weight)
+//                        .onChange(of: vm.weightText) { _, new in vm.onWeightChanged(new) }
+//                    
+//                    Picker("Активность", selection: $vm.activity) {
+//                        ForEach(UserProfile.ActivityLevel.allCases) { a in
+//                            Text(a.rawValue).tag(a)
+//                        }
+//                    }
+//                    .onChange(of: vm.activity) { _, new in vm.onActivityChanged(new) }
+//                }
+//                
+//                // MARK: - Результат
+//                Section("Результат") {
+//                    HStack {
+//                        Text("BMR (Миффлин—Сан Жеор)")
+//                        Spacer()
+//                        Text(vm.bmr > 0 ? "\(Int(vm.bmr)) ккал/день" : "—")
+//                            .fontWeight(.semibold)
+//                    }
+//                    HStack {
+//                        Text("TDEE (с учётом активности)")
+//                        Spacer()
+//                        Text(vm.tdee > 0 ? "\(Int(vm.tdee)) ккал/день" : "—")
+//                            .fontWeight(.semibold)
+//                    }
+//                }
+//            }
+//            .navigationTitle("Ваши данные")
+//            .toolbar {
+//                ToolbarItemGroup(placement: .keyboard) {
+//                    Spacer()
+//                    Button("Готово") { focusedField = nil }
+//                }
+//                ToolbarItem(placement: .bottomBar) {
+//                    Button {
+//                        focusedField = nil
+//                        vm.save(to: modelContext)
+//                    } label: {
+//                        HStack {
+//                            if vm.isSaving { ProgressView().padding(.trailing, 8) }
+//                            Text("Сохранить и продолжить")
+//                                .fontWeight(.semibold)
+//                        }
+//                        .frame(maxWidth: .infinity)
+//                    }
+//                    .disabled(vm.isSaving)
+//                }
+//            }
+//            .onAppear {
+//                vm.loadExistingIfAny(from: modelContext)
+//            }
+//            // MARK: - Alerts
+//            .alert("Сообщение", isPresented: Binding(
+//                get: { vm.alertMessage != nil },
+//                set: { if !$0 { vm.alertMessage = nil } }
+//            )) {
+//                Button("OK", role: .cancel) { }
+//            } message: {
+//                Text(vm.alertMessage ?? "")
+//            }
+//            // MARK: - Toast (простой)
+//            .overlay(alignment: .top) {
+//                if let text = vm.toastMessage {
+//                    ToastView(text: text) {
+//                        vm.toastMessage = nil
+//                    }
+//                    .transition(.move(edge: .top).combined(with: .opacity))
+//                    .padding(.top, 8)
+//                }
+//            }
+//            .animation(.spring(duration: 0.3), value: vm.toastMessage)
+//        }
     }
 }
 

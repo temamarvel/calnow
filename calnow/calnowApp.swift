@@ -7,7 +7,7 @@ struct RootView: View {
         if profiles.first != nil {
             DashboardRootContainer() // ⬅️ теперь сюда
         } else {
-            OnboardingContainer()
+            OnboardingMainView()
         }
     }
 }
