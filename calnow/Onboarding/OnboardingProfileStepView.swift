@@ -11,9 +11,8 @@ import SwiftUI
 
 struct OnboardingProfileStepView: View {
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var healthKitManager : HealthKitManager
     @Query private var profiles: [UserProfile]
-
-    //let onFinished: () -> Void
 
     @State private var heightText: String = ""
     @State private var weightText: String = ""
@@ -67,18 +66,22 @@ struct OnboardingProfileStepView: View {
         }
         .navigationTitle("Ваш профиль")
         .onAppear {
-            preloadExistingProfileIfAny()
+            //preloadExistingProfileIfAny()
         }
+    }
+    
+    private func importProfileFromHealthKit(){
+        //heightText = healthKitManager.fetchLatestHeight()
     }
 
     private func preloadExistingProfileIfAny() {
         guard let profile = existingProfile else { return }
 
-        if let h = profile.height { heightText = String(Int(h)) }
-        if let w = profile.weight { weightText = String(format: "%.1f", w) }
-        if let a = profile.age { ageText = String(a) }
-        if let sex = profile.sex { selectedSex = sex }
-        if let lvl = profile.activity { selectedActivity = lvl }
+//        if let h = profile.height { heightText = String(Int(h)) }
+//        if let w = profile.weight { weightText = String(format: "%.1f", w) }
+//        if let a = profile.age { ageText = String(a) }
+//        if let sex = profile.sex { selectedSex = sex }
+//        if let lvl = profile.activity { selectedActivity = lvl }
     }
 
     private func saveProfile() {

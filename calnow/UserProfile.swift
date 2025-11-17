@@ -32,11 +32,11 @@ final class UserProfile {
     var key: String = "UserProfileSingleton"
     
     // Данные профиля
-    var sex: Sex?
-    var age: Int?
-    var height: Double?
-    var weight: Double?
-    var activity: ActivityLevel?
+    var sex: Sex
+    var age: Int
+    var height: Double
+    var weight: Double
+    var activity: ActivityLevel
     
     // Метаданные (удобно для отладки/синхронизации)
     var createdAt: Date
@@ -62,10 +62,10 @@ final class UserProfile {
     
     // BMR по Миффлину—Сан Жеору
     var bmr: Double {
-        let base = 10.0*(weight ?? 0) + 6.25*(height ?? 0) - 5.0*Double(age ?? 0)
+        let base = 10.0*(weight) + 6.25*(height) - 5.0*Double(age)
         return sex == .male ? (base + 5.0) : (base - 161.0)
     }
     
     // Пример TDEE
-    var tdee: Double { bmr * (activity?.multiplier ?? 1) }
+    var tdee: Double { bmr * (activity.multiplier) }
 }
