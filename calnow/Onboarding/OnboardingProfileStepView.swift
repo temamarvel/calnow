@@ -14,11 +14,11 @@ struct OnboardingProfileStepView: View {
     @EnvironmentObject private var healthKitManager : HealthKitManager
     @Query private var profiles: [UserProfile]
 
-    @State private var heightText: String = ""
-    @State private var weightText: String = ""
-    @State private var ageText: String = ""
-    @State private var selectedSex: Sex = .male
-    @State private var selectedActivity: ActivityLevel = .moderate
+    @State private var height: Double = 0.0
+    @State private var weight: Double = 0.0
+    @State private var age: Int = 0
+    @State private var sex: Sex = .male
+    @State private var activityLevel: ActivityLevel = .moderate
 
     @State private var validationError: String?
 
@@ -29,22 +29,22 @@ struct OnboardingProfileStepView: View {
     var body: some View {
         Form {
             Section(header: Text("Основные параметры")) {
-                TextField("Рост (см)", text: $heightText)
+                TextField("Рост (см)", value: $height, format: .number)
                     .keyboardType(.numberPad)
 
-                TextField("Вес (кг)", text: $weightText)
+                TextField("Вес (кг)", value: $weight, format: .number)
                     .keyboardType(.decimalPad)
 
-                TextField("Возраст", text: $ageText)
+                TextField("Возраст", value: $age, format: .number)
                     .keyboardType(.numberPad)
 
-                Picker("Пол", selection: $selectedSex) {
+                Picker("Пол", selection: $sex) {
                     ForEach(Sex.allCases) { sex in
                         Text(sex.rawValue).tag(sex)
                     }
                 }
 
-                Picker("Активность", selection: $selectedActivity) {
+                Picker("Активность", selection: $activityLevel) {
                     ForEach(ActivityLevel.allCases) { level in
                         Text(level.rawValue).tag(level)
                     }
@@ -71,7 +71,7 @@ struct OnboardingProfileStepView: View {
     }
     
     private func importProfileFromHealthKit(){
-        //heightText = healthKitManager.fetchLatestHeight()
+        //height = healthKitManager.fetchLatestHeight()
     }
 
     private func preloadExistingProfileIfAny() {
@@ -87,31 +87,33 @@ struct OnboardingProfileStepView: View {
     private func saveProfile() {
         validationError = nil
 
-        guard let height = Double(heightText),
-              let weight = Double(weightText),
-              let age = Int(ageText)
-        else {
-            validationError = "Заполните рост, вес и возраст корректно."
-            return
-        }
-
-        let profile = existingProfile ?? UserProfile()
-        profile.height = height
-        profile.weight = weight
-        profile.age = age
-        profile.sex = selectedSex
-        profile.activity = selectedActivity
-        //profile.isCompleted = true   // <- важный флаг
-
-        if existingProfile == nil {
-            context.insert(profile)
-        }
-
-        do {
-            try context.save()
-            //onFinished()
-        } catch {
-            validationError = "Не удалось сохранить профиль: \(error.localizedDescription)"
-        }
+        //TODO: implement save
+        
+//        guard let height = Double(heightText),
+//              let weight = Double(weightText),
+//              let age = Int(ageText)
+//        else {
+//            validationError = "Заполните рост, вес и возраст корректно."
+//            return
+//        }
+//
+//        let profile = existingProfile ?? UserProfile()
+//        profile.height = height
+//        profile.weight = weight
+//        profile.age = age
+//        profile.sex = selectedSex
+//        profile.activity = selectedActivity
+//        //profile.isCompleted = true   // <- важный флаг
+//
+//        if existingProfile == nil {
+//            context.insert(profile)
+//        }
+//
+//        do {
+//            try context.save()
+//            //onFinished()
+//        } catch {
+//            validationError = "Не удалось сохранить профиль: \(error.localizedDescription)"
+//        }
     }
 }
