@@ -3,11 +3,19 @@ import SwiftData
 
 struct RootView: View {
     @Query private var profiles: [UserProfile]
+    @State private var showOnboarding = false
     var body: some View {
-        if profiles.first != nil {
-            DashboardRootContainer() // ⬅️ теперь сюда
-        } else {
-            OnboardingMainView()
+        Group{
+            if showOnboarding {
+                OnboardingMainView(){
+                    showOnboarding = false
+                }
+            } else {
+                DashboardRootContainer() // ⬅️ теперь сюда
+            }
+        }
+        .task {
+            showOnboarding = !profiles.isEmpty
         }
     }
 }

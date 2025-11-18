@@ -33,6 +33,8 @@ struct OnboardingProfileStepView: View {
     @State private var ageValidationError: String?
     
     @State private var saveOk: Bool?
+    
+    let onProfileSaved: () -> Void
 
     private var existingProfile: UserProfile? {
         profiles.first
@@ -95,7 +97,7 @@ struct OnboardingProfileStepView: View {
             if let saveOk {
                 ToastView(
                     text: saveOk ? "Профиль сохранен" : "Не удалось сохранить профиль"
-                ){}
+                ){onProfileSaved()}
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .padding(.top, 8)
             }
@@ -152,7 +154,10 @@ struct OnboardingProfileStepView: View {
         do {
             context.insert(profile)
             try context.save()
-            saveOk = true
+            withAnimation {
+                saveOk = true
+            }
+            
         } catch {
             saveOk = false
         }

@@ -16,6 +16,8 @@ struct OnboardingMainView: View {
     
     @State private var step: Step = .healthPermissions
     
+    let onOnboardingComplete: () -> Void
+    
     var body: some View {
         Group {
             switch step {
@@ -24,7 +26,9 @@ struct OnboardingMainView: View {
                         step = .profile
                     }
                 case .profile:
-                    OnboardingProfileStepView()
+                    OnboardingProfileStepView(){
+                        onOnboardingComplete()
+                    }
             }
         }
         .animation(.default, value: step)
