@@ -3,19 +3,24 @@ import SwiftData
 
 struct RootView: View {
     @Query private var profiles: [UserProfile]
-    @State private var showOnboarding = false
+    @State private var showOnboarding: Bool? = nil
     var body: some View {
-        Group{
-            if showOnboarding {
-                OnboardingMainView(){
-                    showOnboarding = false
+        Group {
+            if let showOnboarding {
+                if showOnboarding {
+                    OnboardingMainView {
+                        self.showOnboarding = false
+                    }
+                } else {
+                    DashboardRootContainer()
                 }
             } else {
-                DashboardRootContainer() // ⬅️ теперь сюда
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .task {
-            showOnboarding = !profiles.isEmpty
+            showOnboarding = profiles.isEmpty
         }
     }
 }
