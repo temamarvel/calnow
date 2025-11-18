@@ -32,7 +32,7 @@ struct OnboardingProfileStepView: View {
     @State private var weightValidationError: String?
     @State private var ageValidationError: String?
     
-    @State private var saveOk: Bool = false
+    @State private var saveOk: Bool?
 
     private var existingProfile: UserProfile? {
         profiles.first
@@ -92,12 +92,10 @@ struct OnboardingProfileStepView: View {
             importProfileFromHealthKit()
         }
         .overlay(alignment: .top) {
-            if saveOk {
-                ToastView(text: "Профиль сохранен") { }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .padding(.top, 8)
-            } else {
-                ToastView(text: "Не удалось сохранить профиль") { }
+            if let saveOk {
+                ToastView(
+                    text: saveOk ? "Профиль сохранен" : "Не удалось сохранить профиль"
+                ){}
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .padding(.top, 8)
             }
@@ -135,7 +133,7 @@ struct OnboardingProfileStepView: View {
         }
     }
     
-    var isProfileValid: Bool { heightValidationError == nil || weightValidationError == nil || ageValidationError == nil }
+    var isProfileValid: Bool { heightValidationError == nil && weightValidationError == nil && ageValidationError == nil }
     
     private func importProfileFromHealthKit(){
         Task{
