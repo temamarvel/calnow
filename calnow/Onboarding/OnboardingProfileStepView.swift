@@ -31,6 +31,8 @@ struct OnboardingProfileStepView: View {
     @State private var heightValidationError: String?
     @State private var weightValidationError: String?
     @State private var ageValidationError: String?
+    
+    @State private var saveOk: Bool = false
 
     private var existingProfile: UserProfile? {
         profiles.first
@@ -87,8 +89,18 @@ struct OnboardingProfileStepView: View {
         }
         .navigationTitle("Ваш профиль")
         .onAppear {
-            //preloadExistingProfileIfAny()
             importProfileFromHealthKit()
+        }
+        .overlay(alignment: .top) {
+            if saveOk {
+                ToastView(text: "Профиль сохранен") { }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 8)
+            } else {
+                ToastView(text: "Не удалось сохранить профиль") { }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 8)
+            }
         }
     }
     
@@ -123,6 +135,8 @@ struct OnboardingProfileStepView: View {
         }
     }
     
+    var isProfileValid: Bool { heightValidationError == nil || weightValidationError == nil || ageValidationError == nil }
+    
     private func importProfileFromHealthKit(){
         Task{
             height = try await healthKitManager.fetchLatestHeight() ?? 0.0
@@ -132,46 +146,17 @@ struct OnboardingProfileStepView: View {
         }
     }
 
-    private func preloadExistingProfileIfAny() {
-        guard let profile = existingProfile else { return }
-
-//        if let h = profile.height { heightText = String(Int(h)) }
-//        if let w = profile.weight { weightText = String(format: "%.1f", w) }
-//        if let a = profile.age { ageText = String(a) }
-//        if let sex = profile.sex { selectedSex = sex }
-//        if let lvl = profile.activity { selectedActivity = lvl }
-    }
-
     private func saveProfile() {
-        //validationError = nil
-
-        //TODO: implement save
+        guard isProfileValid else { return }
         
-//        guard let height = Double(heightText),
-//              let weight = Double(weightText),
-//              let age = Int(ageText)
-//        else {
-//            validationError = "Заполните рост, вес и возраст корректно."
-//            return
-//        }
-//
-//        let profile = existingProfile ?? UserProfile()
-//        profile.height = height
-//        profile.weight = weight
-//        profile.age = age
-//        profile.sex = selectedSex
-//        profile.activity = selectedActivity
-//        //profile.isCompleted = true   // <- важный флаг
-//
-//        if existingProfile == nil {
-//            context.insert(profile)
-//        }
-//
-//        do {
-//            try context.save()
-//            //onFinished()
-//        } catch {
-//            validationError = "Не удалось сохранить профиль: \(error.localizedDescription)"
-//        }
+        let profile = UserProfile(sex: sex, age: age, height: height, weight: weight, activity: activityLevel)
+        
+        do {
+            context.insert(profile)
+            try context.save()
+            saveOk = true
+        } catch {
+            saveOk = false
+        }
     }
 }

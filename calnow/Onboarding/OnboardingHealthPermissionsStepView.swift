@@ -59,8 +59,6 @@ struct OnboardingHealthPermissionsStepView: View {
         defer { isRequestInProgress = false }
 
         do {
-            // здесь твой реальный запрос к HealthKit
-            // например:
             await healthKit.requestAuthorization()
             onCompleted()
         } catch {

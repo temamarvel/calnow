@@ -152,7 +152,7 @@ struct OnboardingView: View {
 }
 
 // MARK: - Простой тост
-private struct ToastView: View {
+struct ToastView: View {
     let text: String
     var onDismiss: () -> Void
     @State private var isVisible = true
