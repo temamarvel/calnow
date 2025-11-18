@@ -168,7 +168,15 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         try await sumEnergyToday(for: .basalEnergyBurned)
     }
     
+    
+    func fetchTotalEnergyToday() async throws -> Double {
+        async let basal = fetchBasalEnergyToday()
+        async let active = fetchActiveEnergyToday()
+        return try await basal + active
+    }
     // MARK: - Внутренняя утилита
+    
+
     
     private func sumEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double {
         guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return 0 }

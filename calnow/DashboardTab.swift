@@ -40,7 +40,7 @@ struct DashboardRootView: View {
             Group {
                 switch tab {
                 case .current:
-                    MainDashboardView(vm: currentVM)
+                    MainDashboardView()
                 case .charts:
                     EnergyChartsView(vm: chartsVM)
                 }
