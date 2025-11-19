@@ -16,6 +16,7 @@ struct EnergyBarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            let fullRange = max(tdee, 1) * 1.5
             // Заголовок + цифры
             HStack {
                 Text(title)
@@ -24,7 +25,7 @@ struct EnergyBarView: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("Всего: \(Int(total)) / \(Int(tdee)) ккал")
+                    Text("Всего: \(Int(total)) / \(Int(fullRange)) ккал")
                         .font(.caption.monospacedDigit())
 
                     Text("BMR: \(Int(bmr)) ккал")
@@ -35,11 +36,11 @@ struct EnergyBarView: View {
 
             GeometryReader { geo in
                 let width = geo.size.width
-                let safeTDEE = max(tdee, 1) // защита от деления на 0
+                 // защита от деления на 0
 
                 // доля BMR и доля total от TDEE
-                let bmrRatio = min(bmr / safeTDEE, 1)
-                let totalRatio = min(total / safeTDEE, 1)
+                let bmrRatio = min(bmr / fullRange, 1)
+                let totalRatio = min(total / fullRange, 1)
 
                 ZStack(alignment: .leading) {
                     // Полная полоса TDEE — фон
