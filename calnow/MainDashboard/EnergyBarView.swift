@@ -61,7 +61,7 @@ struct EnergyBarView: View {
             }
             .frame(height: 14) // фиксируем высоту GeometryReader
         }
-        .padding(12)
+        //.padding(12)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
