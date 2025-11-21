@@ -312,6 +312,12 @@ struct CalorieRingView2: View {
 struct CircleProgressView3: View {
     
     let progress: Double
+    private var normalizedProgress: Double {
+        // всё, что <= 0 — считаем нулём
+        guard progress > 0 else { return 0 }
+        if progress == 1.0 { return 1 }
+        return progress.truncatingRemainder(dividingBy: 1)
+    }
     
     var body: some View {
         ZStack {
@@ -322,15 +328,15 @@ struct CircleProgressView3: View {
                 .foregroundColor(Color(UIColor.systemGray3))
 
             // green base circle to receive shadow
-            Circle()
-                .trim(from: 0.0, to: CGFloat(min(self.progress, 0.5)))
-                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
-                .foregroundColor(Color(UIColor.systemGreen))
-                .rotationEffect(Angle(degrees: 270.0))
+//            Circle()
+//                .trim(from: 0.0, to: CGFloat(min(self.progress, 0.5)))
+//                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
+//                .foregroundColor(Color(UIColor.systemGreen))
+//                .rotationEffect(Angle(degrees: 270.0))
 
             // point with shadow, clipped
             Circle()
-                .trim(from: CGFloat(abs((min(progress, 1.0))-0.001)), to: CGFloat(abs((min(progress, 1.0))-0.0005)))
+                .trim(from: CGFloat(abs((min(normalizedProgress, 1.0))-0.001)), to: CGFloat(abs((min(normalizedProgress, 1.0))-0.0005)))
                 .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
                 .foregroundColor(Color(UIColor.blue))
                 .shadow(color: .black, radius: 10, x: 0, y: 0)
@@ -338,13 +344,16 @@ struct CircleProgressView3: View {
                 .clipShape(
                     Circle().stroke(lineWidth: 30)
                 )
-            
+            VStack{
+                Text("\(progress)").foregroundColor(Color.green)
+                Text("\(normalizedProgress)").foregroundColor(Color.red)
+            }
             // green overlay circle to hide shadow on one side
-            Circle()
-                .trim(from: progress > 0.5 ? 0.25 : 0, to: CGFloat(min(self.progress, 1.0)))
-                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
-                .foregroundColor(Color(UIColor.systemGreen))
-                .rotationEffect(Angle(degrees: 270.0))
+//            Circle()
+//                .trim(from: progress > 0.5 ? 0.25 : 0, to: CGFloat(min(self.progress, 1.0)))
+//                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
+//                .foregroundColor(Color(UIColor.systemGreen))
+//                .rotationEffect(Angle(degrees: 270.0))
 
 
             
@@ -353,17 +362,23 @@ struct CircleProgressView3: View {
     }
 }
 
-#Preview("Calorie ring3") {
-    VStack(spacing: 24) {
-        // ещё не достиг цели
-        CircleProgressView3(progress: 0.2)
+/// Обёртка только для превью
+struct CircleProgressView3PreviewContainer: View {
+    @State private var progress: Double = 0.5   // 0...1 — цель, >1 — перевыполнение
 
-        // ровно на цели
-        CircleProgressView3(progress: 1.0)
+    var body: some View {
+        VStack(spacing: 24) {
+            CircleProgressView3(progress: progress)
 
-        // перевыполнил цель — виден хвост
-        CircleProgressView3(progress: 1.5)
+            // Чтобы в превью можно было «крутить» значение
+            Slider(value: $progress, in: 0...2)
+                .padding(.horizontal)
+        }
+        .padding()
+        .background(Color.black)
     }
-    .padding()
-    .background(Color.black)
+}
+
+#Preview("Calorie ring3 interactive") {
+    CircleProgressView3PreviewContainer()
 }
