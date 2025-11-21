@@ -1,0 +1,15 @@
+{
+  "originHash" : "2dcbe1b45d60e22749466f3db2a620972f65a86bc34d8f87c792f989d8e2c4bd",
+  "pins" : [
+    {
+      "identity" : "circleprogressbar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/temamarvel/CircleProgressBar.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "0c194a7ad76ad6ba6876db5981d7651be99af462"
+      }
+    }
+  ],
+  "version" : 3
+}

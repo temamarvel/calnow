@@ -1,4 +1,5 @@
 import SwiftUI
+import CircleProgressBar
 
 struct CalorieRingView: View {
     let goal: Double    // целевая калорийность (TDEE)
@@ -378,7 +379,7 @@ struct CircleProgressView3PreviewContainer: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            CircleProgressView3(progress: progress)
+            CircleProgressView(progress: progress)
 
             // Чтобы в превью можно было «крутить» значение
             Slider(value: $progress, in: 0...3)
