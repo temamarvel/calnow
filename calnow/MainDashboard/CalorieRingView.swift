@@ -313,34 +313,36 @@ struct CircleProgressView3: View {
     
     let progress: Double
     private var normalizedProgress: Double {
-        // всё, что <= 0 — считаем нулём
         guard progress > 0 else { return 0 }
         if progress == 1.0 { return 1 }
         return progress.truncatingRemainder(dividingBy: 1)
     }
+    private var isFirstLap: Bool {
+        return progress <= 0.98
+    }
     
     var body: some View {
         ZStack {
-            // grey background circle
             Circle()
                 .stroke(lineWidth: 30)
                 .opacity(0.3)
                 .foregroundColor(Color(UIColor.systemGray3))
 
-            // green base circle to receive shadow
-//            Circle()
-//                .trim(from: 0.0, to: CGFloat(min(self.progress, 0.5)))
-//                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
-//                .foregroundColor(Color(UIColor.systemGreen))
-//                .rotationEffect(Angle(degrees: 270.0))
+            if !isFirstLap {
+                withAnimation(){
+                    Circle()
+                        .stroke(style: StrokeStyle(lineWidth: 30))
+                        .foregroundColor(Color(UIColor.systemGreen))
 
-            // point with shadow, clipped
+                }
+            }
+
             Circle()
                 .trim(from: CGFloat(abs((min(normalizedProgress, 1.0))-0.001)), to: CGFloat(abs((min(normalizedProgress, 1.0))-0.0005)))
                 .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
-                .foregroundColor(Color(UIColor.blue))
+                .foregroundColor(Color(UIColor.systemGreen))
                 .shadow(color: .black, radius: 10, x: 0, y: 0)
-                .rotationEffect(Angle(degrees: 270.0))
+                .rotationEffect(.degrees(-90.0))
                 .clipShape(
                     Circle().stroke(lineWidth: 30)
                 )
@@ -348,12 +350,20 @@ struct CircleProgressView3: View {
                 Text("\(progress)").foregroundColor(Color.green)
                 Text("\(normalizedProgress)").foregroundColor(Color.red)
             }
-            // green overlay circle to hide shadow on one side
-//            Circle()
-//                .trim(from: progress > 0.5 ? 0.25 : 0, to: CGFloat(min(self.progress, 1.0)))
-//                .stroke(style: StrokeStyle(lineWidth: 30, lineCap: .round, lineJoin: .round))
-//                .foregroundColor(Color(UIColor.systemGreen))
-//                .rotationEffect(Angle(degrees: 270.0))
+            
+            Circle()
+                .trim(from: 0.0, to: isFirstLap ? normalizedProgress : 0.25)
+                .stroke(style: StrokeStyle(
+                    lineWidth: 10,
+                    lineCap: .round,
+                    lineJoin: .round))
+                .foregroundStyle(.angularGradient(
+                    colors: [.green, .red],
+                    center: .center,
+                    startAngle: .degrees(-10),
+                    endAngle: .degrees(350)
+                ))
+                .rotationEffect(.degrees(isFirstLap ? -90.0 : -180.0+normalizedProgress*360))
 
 
             
@@ -364,14 +374,14 @@ struct CircleProgressView3: View {
 
 /// Обёртка только для превью
 struct CircleProgressView3PreviewContainer: View {
-    @State private var progress: Double = 0.5   // 0...1 — цель, >1 — перевыполнение
+    @State private var progress: Double = 0.1   // 0...1 — цель, >1 — перевыполнение
 
     var body: some View {
         VStack(spacing: 24) {
             CircleProgressView3(progress: progress)
 
             // Чтобы в превью можно было «крутить» значение
-            Slider(value: $progress, in: 0...2)
+            Slider(value: $progress, in: 0...3)
                 .padding(.horizontal)
         }
         .padding()
