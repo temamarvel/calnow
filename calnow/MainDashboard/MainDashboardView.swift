@@ -27,11 +27,12 @@ struct MainDashboardView: View {
     
     // Факт: возьми это из HealthKitManager, когда будет готово
     @State private var actualTotal: Double? = 1900
+    @State private var averageTotal: Double? = 0
     
     private func loadActualTotal() async {
         do {
-            let total = try await healthKitManager.fetchTotalEnergyToday()
-            actualTotal = total
+            actualTotal = try await healthKitManager.fetchTotalEnergyToday()
+            averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -43,8 +44,7 @@ struct MainDashboardView: View {
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Сегодня")
-                    .font(.title.bold())
+                
                 
                 if profile == nil {
                     Text("Профиль не заполнен")
@@ -52,21 +52,20 @@ struct MainDashboardView: View {
                         .foregroundStyle(.secondary)
                 }
                 
-                CircleProgressView(progress: plannedTotal/actualTotal!)
+                ZStack{
+                    CircleProgressView(progress: actualTotal!/plannedTotal)
+                    
+                    VStack{
+                        Text("\(Int(actualTotal!))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                        
+                        Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                        
+                        Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                    }.fixedSize(horizontal: true, vertical: false)
+                }
                 
-//                EnergyBarView(
-//                    title: "План на день",
-//                    tdee: tdee,
-//                    bmr: bmr,
-//                    total: plannedTotal
-//                )
-//                
-//                EnergyBarView(
-//                    title: "Факт сейчас",
-//                    tdee: tdee,
-//                    bmr: bmr,
-//                    total: actualTotal ?? 999
-//                )
+                
+                Text("Avarage \(averageTotal)")
                 
                 Spacer()
             }
@@ -103,99 +102,6 @@ struct MainDashboardView: View {
     }
 }
 
-// MARK: - Секция «Профиль»
-struct ProfileSectionView: View {
-    let profile: UserProfile?
-    
-    var body: some View {
-        Section("Профиль") {
-            if let p = profile {
-                LabeledContent("Пол") { Text(p.sex.rawValue) }
-                LabeledContent("Возраст") { Text("\(p.age) лет") }
-                LabeledContent("Рост") { Text("\(Int(p.height)) см") }
-                LabeledContent("Вес") { Text(String(format: "%.1f кг", p.weight)) }
-                LabeledContent("Активность") { Text(p.activity.rawValue) }
-            } else {
-                Text("Профиль не найден")
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-}
-
-// MARK: - Секция «Расчёты»
-struct CalculationsSectionView: View {
-    let bmr: Double
-    let tdee: Double
-    
-    var body: some View {
-        Section("Расчёты") {
-            LabeledContent("BMR (Миффлин—Сан Жеор)") {
-                Text(bmr > 0 ? "\(Int(bmr)) ккал/день" : "—")
-                    .fontWeight(.semibold)
-            }
-            LabeledContent("TDEE (с учётом активности)") {
-                Text(tdee > 0 ? "\(Int(tdee)) ккал/день" : "—")
-                    .fontWeight(.semibold)
-            }
-        }
-    }
-}
-
-// MARK: - Секция «Сегодня»
-struct TodaySectionView: View {
-    let basalToday: Double
-    let activeToday: Double
-    
-    private var totalToday: Int { Int(basalToday + activeToday) }
-    
-    var body: some View {
-        Section("Сегодня") {
-            HStack {
-                Text("Базальный расход")
-                Spacer()
-                Text("\(Int(basalToday)) ккал").fontWeight(.semibold)
-            }
-            HStack {
-                Text("Активная энергия")
-                Spacer()
-                Text("\(Int(activeToday)) ккал").fontWeight(.semibold)
-            }
-            HStack {
-                Text("Всего за сегодня")
-                Spacer()
-                Text("\(totalToday) ккал").fontWeight(.bold)
-            }
-        }
-    }
-}
-
-// MARK: - Превью секций
-//#Preview("Profile Section") {
-//    let schema = Schema([UserProfile.self])
-//    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-//    let container = try! ModelContainer(for: schema, configurations: [config])
-//    let ctx = ModelContext(container)
-//    let p = UserProfile(sex: .male, age: 35, height: 185, weight: 90, activity: .moderate)
-//    p.key = "UserProfileSingletonV1"
-//    ctx.insert(p); try? ctx.save()
-//    
-//    List { ProfileSectionView(profile: p) }
-//        .modelContainer(container)
-//        .environment(\.locale, .init(identifier: "ru_RU"))
-//}
-
-//#Preview("Calculations Section") {
-//    List { CalculationsSectionView(bmr: 1880, tdee: 2914) }
-//        .environment(\.locale, .init(identifier: "ru_RU"))
-//}
-
-//#Preview("Today Section") {
-//    List { TodaySectionView(basalToday: 1720, activeToday: 430) }
-//        .environment(\.locale, .init(identifier: "ru_RU"))
-//}
-
-// MARK: - Общее превью MainDashboardView с мок-данными
 struct MainDashboardPreviewWrapper: View {
     let container: ModelContainer
     @StateObject private var healthManager = HealthKitManager()

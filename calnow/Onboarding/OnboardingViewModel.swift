@@ -231,4 +231,5 @@ protocol HealthKitServicing: AnyObject {
     func fetchActiveEnergyToday() async throws -> Double
     func fetchBasalEnergyToday() async throws -> Double
     func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint]
+    func fetchAverageDailyEnergy(window: EnergyAverageWindow) async throws -> Double
 }
