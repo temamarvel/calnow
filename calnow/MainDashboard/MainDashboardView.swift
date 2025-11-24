@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import CircleProgressBar
 
 // MARK: - MainDashboardView (использует секции)
 struct MainDashboardView: View {
@@ -25,7 +26,7 @@ struct MainDashboardView: View {
     }
     
     // Факт: возьми это из HealthKitManager, когда будет готово
-    @State private var actualTotal: Double? = nil
+    @State private var actualTotal: Double? = 1900
     
     private func loadActualTotal() async {
         do {
@@ -51,19 +52,21 @@ struct MainDashboardView: View {
                         .foregroundStyle(.secondary)
                 }
                 
-                EnergyBarView(
-                    title: "План на день",
-                    tdee: tdee,
-                    bmr: bmr,
-                    total: plannedTotal
-                )
+                CircleProgressView(progress: plannedTotal/actualTotal!)
                 
-                EnergyBarView(
-                    title: "Факт сейчас",
-                    tdee: tdee,
-                    bmr: bmr,
-                    total: actualTotal ?? 999
-                )
+//                EnergyBarView(
+//                    title: "План на день",
+//                    tdee: tdee,
+//                    bmr: bmr,
+//                    total: plannedTotal
+//                )
+//                
+//                EnergyBarView(
+//                    title: "Факт сейчас",
+//                    tdee: tdee,
+//                    bmr: bmr,
+//                    total: actualTotal ?? 999
+//                )
                 
                 Spacer()
             }
@@ -193,19 +196,31 @@ struct TodaySectionView: View {
 //}
 
 // MARK: - Общее превью MainDashboardView с мок-данными
-//#Preview("MainDashboard – Demo") {
-//    // In-memory SwiftData
-//    let schema = Schema([UserProfile.self])
-//    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-//    let container = try! ModelContainer(for: schema, configurations: [config])
-//    
-//    // Единственный профиль
-////    let ctx = ModelContext(container)
-////    let p = UserProfile(sex: .male, age: 35, height: 185, weight: 90, activity: .moderate)
-////    p.key = "UserProfileSingletonV1"
-////    ctx.insert(p); try? ctx.save()
-//    
-//    MainDashboardContainer()
-//        .modelContainer(container)
-//        .environment(\.locale, .init(identifier: "ru_RU"))
-//}
+struct MainDashboardPreviewWrapper: View {
+    let container: ModelContainer
+    @StateObject private var healthManager = HealthKitManager()
+
+    init() {
+        // in-memory контейнер
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: UserProfile.self, configurations: config)
+
+        let context = container.mainContext
+
+        // тестовый профиль — подгони под свою модель
+        let profile = UserProfile()
+//        profile.bmr = 1700
+//        profile.tdee = 2600
+        context.insert(profile)
+    }
+
+    var body: some View {
+        MainDashboardView()
+            .modelContainer(container)
+            .environmentObject(healthManager)
+    }
+}
+
+#Preview("Main dashboard") {
+    MainDashboardPreviewWrapper()
+}
