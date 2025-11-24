@@ -28,10 +28,10 @@ final class EnergyChartsViewModel: ObservableObject {
     
     func refresh() {
         Task {
-            guard health.isAuthorized else {
-                alertMessage = "Нет доступа к Здоровью. Разрешите доступ, чтобы построить графики."
-                return
-            }
+//            guard health.isAuthorized else {
+//                alertMessage = "Нет доступа к Здоровью. Разрешите доступ, чтобы построить графики."
+//                return
+//            }
             isLoading = true
             defer { isLoading = false }
             do {

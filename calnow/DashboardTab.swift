@@ -42,7 +42,7 @@ struct DashboardRootView: View {
                 case .current:
                     MainDashboardView()
                 case .charts:
-                    EnergyChartsView(vm: chartsVM)
+                    BasalEnergyChartView()
                 }
             }
             .toolbar {
