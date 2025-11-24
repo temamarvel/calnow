@@ -343,8 +343,8 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     
     func basalEnergyPoints(for period: BasalChartPeriod) async throws -> [BasalEnergyPoint] {
         let calendar = Calendar.current
-        let end = calendar.startOfDay(for: Date())
-        let start = calendar.date(byAdding: .day, value: -(period.days - 1), to: end)!
+        let end = Date()
+        let start = calendar.date(byAdding: .day, value: -period.days, to: calendar.startOfDay(for: end))!
         let interval = DateInterval(start: start, end: end)
 
         // здесь можно использовать твой dailyBuckets(for: .basalEnergyBurned, in: interval)
