@@ -1,10 +1,3 @@
-//
-//  BasalEnergyChartView.swift
-//  calnow
-//
-//  Created by Artem Denisov on 24.11.2025.
-//
-
 import SwiftUI
 import Charts
 
@@ -31,58 +24,56 @@ enum BasalChartPeriod: String, CaseIterable, Identifiable {
     case month
     case halfYear
     case year
-
+    
     var id: Self { self }
-
+    
     var title: String {
         switch self {
-        case .week:     return "Неделя"
-        case .month:    return "Месяц"
-        case .halfYear: return "6 мес"
-        case .year:     return "Год"
+            case .week:     return "Неделя"
+            case .month:    return "Месяц"
+            case .halfYear: return "6 мес"
+            case .year:     return "Год"
         }
     }
-
+    
     /// Сколько дней показываем на графике
     var days: Int {
         switch self {
-        case .week:     return 7
-        case .month:    return 30
-        case .halfYear: return 180
-        case .year:     return 365
+            case .week:     return 7
+            case .month:    return 30
+            case .halfYear: return 180
+            case .year:     return 365
         }
     }
 }
-
 
 struct BasalEnergyChartView: View {
     @State private var period: BasalChartPeriod = .week
     @State private var basalPoints: [BasalEnergyPoint] = []
     @State private var activePoints: [ActiveEnergyPoint] = []
-    @State private var showAverageLine: Bool = true
     
+    // ⭐ Новый флаг: по умолчанию показываем СРЕДНИЕ, а не детальные линии
+    @State private var showDailyChart: Bool = false
     
     @EnvironmentObject private var healthKitManager: HealthKitManager
-
+    
     private func loadData() async {
         do {
             basalPoints = try await healthKitManager.basalEnergyPoints(for: period)
             activePoints = try await healthKitManager.activeEnergyPoints(for: period)
         } catch {
-            // обработка ошибки, можно добавить стейт errorMessage
             print("Ошибка загрузки: \(error)")
         }
     }
-
+    
+    // ⭐ Сумма за неделю (тотал)
     private var weekTotalKcal: Double {
         let calendar = Calendar.current
         
-        // интервал текущей недели по локали (startOfWeek...startOfNextWeek)
         guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: Date()) else {
             return 0
         }
         
-        // суммируем total только для точек внутри этой недели
         return totalPoints
             .filter { point in
                 let day = calendar.startOfDay(for: point.date)
@@ -91,124 +82,176 @@ struct BasalEnergyChartView: View {
             .reduce(0) { $0 + $1.totalKcal }
     }
     
-    // вычисляем среднее по текущим точкам
+    // ⭐ Среднее базального
     private var averageBasal: Double {
         guard !basalPoints.isEmpty else { return 0 }
         let sum = basalPoints.reduce(0) { $0 + $1.basalKcal }
         return sum / Double(basalPoints.count)
     }
     
+    // ⭐ Среднее активного
+    private var averageActive: Double {
+        guard !activePoints.isEmpty else { return 0 }
+        let sum = activePoints.reduce(0) { $0 + $1.activeKcal }
+        return sum / Double(activePoints.count)
+    }
+    
+    // ⭐ Среднее тотала
+    private var averageTotal: Double {
+        guard !totalPoints.isEmpty else { return 0 }
+        let sum = totalPoints.reduce(0) { $0 + $1.totalKcal }
+        return sum / Double(totalPoints.count)
+    }
+    
     private var totalPoints: [TotalEnergyPoint] {
         let calendar = Calendar.current
-
-        // 1. Приводим даты к startOfDay, чтобы не разъезжались по времени
+        
         let basalByDate = Dictionary(
             uniqueKeysWithValues: basalPoints.map { point in
                 (calendar.startOfDay(for: point.date), point.basalKcal)
             }
         )
-
+        
         let activeByDate = Dictionary(
             uniqueKeysWithValues: activePoints.map { point in
                 (calendar.startOfDay(for: point.date), point.activeKcal)
             }
         )
-
-        // 2. Собираем полный набор дат, которые есть хотя бы в одной серии
+        
         let allDates = Set(basalByDate.keys).union(activeByDate.keys)
-
-        // 3. Для каждой даты считаем сумму
+        
         let result: [TotalEnergyPoint] = allDates.map { date in
             let basal = basalByDate[date] ?? 0
             let active = activeByDate[date] ?? 0
             return TotalEnergyPoint(date: date, totalKcal: basal + active)
         }
-
-        // 4. Возвращаем отсортированным по дате
+        
         return result.sorted { $0.date < $1.date }
     }
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             // Заголовок + период
             HStack {
-                Text("Базальный расход, ккал/день")
+                Text("Энергозатраты, ккал/день")
                     .font(.headline)
                 Spacer()
             }
-
+            
             Picker("Период", selection: $period) {
                 ForEach(BasalChartPeriod.allCases) { range in
                     Text(range.title).tag(range)
                 }
             }
             .pickerStyle(.segmented)
-
-            Toggle("Показывать среднее значение", isOn: $showAverageLine)
+            
+            // ⭐ Меняем смысл тоггла:
+            // теперь он включает/выключает ДЕТАЛИЗАЦИЮ
+            Toggle("Показывать детализацию по дням", isOn: $showDailyChart)
                 .font(.subheadline)
-
+            
             Chart {
-                // Линейный график по дням
-                ForEach(basalPoints) { point in
-                    LineMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Базальный", point.basalKcal)
-                    )
-                    // интерполяция: сглаженная линия вместо "ломаной"
-                    .interpolationMethod(.catmullRom)
-
-                    // Можно добавить точки на графике
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Базальный", point.basalKcal)
-                    )
-                    .symbolSize(20)
-                }.foregroundStyle(by: .value("Серия", "Базальный"))
-                
-                ForEach(activePoints) { point in
-                    LineMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Активный", point.activeKcal)
-                    )
-                    // интерполяция: сглаженная линия вместо "ломаной"
-                    .interpolationMethod(.catmullRom)
-
-                    // Можно добавить точки на графике
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Активный", point.activeKcal)
-                    )
-                    .symbolSize(20)
-                }.foregroundStyle(by: .value("Серия", "Активный"))
-                
-                ForEach(totalPoints) { point in
-                    LineMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Активный", point.totalKcal)
-                    )
-                    // интерполяция: сглаженная линия вместо "ломаной"
-                    .interpolationMethod(.catmullRom)
-
-                    // Можно добавить точки на графике
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Активный", point.totalKcal)
-                    )
-                    .symbolSize(20)
-                }.foregroundStyle(by: .value("Серия", "Итоговый"))
-
-                // Линия среднего значения
-                if showAverageLine && averageBasal > 0 {
-                    RuleMark(
-                        y: .value("Среднее", averageBasal)
-                    )
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .foregroundStyle(.secondary)
-                    .annotation(position: .bottom, alignment: .center) {
-                        Text("Среднее \(Int(averageBasal)) ккал")
-                            .font(.caption)
-                            .padding(4)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                if showDailyChart {
+                    // -----------------------------
+                    // РЕЖИМ ДЕТАЛЬНОГО ГРАФИКА
+                    // -----------------------------
+                    
+                    // Базальный
+                    ForEach(basalPoints) { point in
+                        LineMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.basalKcal)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        
+                        PointMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.basalKcal)
+                        )
+                        .symbolSize(20)
+                    }
+                    .foregroundStyle(by: .value("Серия", "Базальный"))
+                    
+                    // Активный
+                    ForEach(activePoints) { point in
+                        LineMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.activeKcal)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        
+                        PointMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.activeKcal)
+                        )
+                        .symbolSize(20)
+                    }
+                    .foregroundStyle(by: .value("Серия", "Активный"))
+                    
+                    // Итоговый
+                    ForEach(totalPoints) { point in
+                        LineMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.totalKcal)
+                        )
+                        .interpolationMethod(.catmullRom)
+                        
+                        PointMark(
+                            x: .value("Дата", point.date),
+                            y: .value("Ккал/день", point.totalKcal)
+                        )
+                        .symbolSize(20)
+                    }
+                    .foregroundStyle(by: .value("Серия", "Итоговый"))
+                    
+                } else {
+                    // -----------------------------
+                    // РЕЖИМ СРЕДНИХ ЛИНИЙ
+                    // -----------------------------
+                    
+                    if averageBasal > 0 {
+                        RuleMark(
+                            y: .value("Среднее базальный", averageBasal)
+                        )
+                        //.lineStyle(StrokeStyle(lineWidth: 2))
+                        .foregroundStyle(by: .value("Серия", "Базальный"))
+                        .annotation(position: .top) {
+                            Text("Базальный: \(Int(averageBasal)) ккал/день")
+                                .font(.caption)
+                                .padding(4)
+                                .background(.thinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        }
+                    }
+                    
+                    if averageActive > 0 {
+                        RuleMark(
+                            y: .value("Среднее активный", averageActive)
+                        )
+                        //.lineStyle(StrokeStyle(lineWidth: 2))
+                        .foregroundStyle(by: .value("Серия", "Активный"))
+                        .annotation(position: .top) {
+                            Text("Активный: \(Int(averageActive)) ккал/день")
+                                .font(.caption)
+                                .padding(4)
+                                .background(.thinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        }
+                    }
+                    
+                    if averageTotal > 0 {
+                        RuleMark(
+                            y: .value("Среднее всего", averageTotal)
+                        )
+                        //.lineStyle(StrokeStyle(lineWidth: 2))
+                        .foregroundStyle(by: .value("Серия", "Итоговый"))
+                        .annotation(position: .top) {
+                            Text("Итого: \(Int(averageTotal)) ккал/день")
+                                .font(.caption)
+                                .padding(4)
+                                .background(.thinMaterial)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        }
                     }
                 }
             }
@@ -218,7 +261,6 @@ struct BasalEnergyChartView: View {
                 "Итоговый": Color.purple
             ])
             .chartXAxis {
-                // Ось X по датам, но не слишком плотная
                 AxisMarks(values: .automatic(desiredCount: 4))
             }
             .chartYAxis {
@@ -226,9 +268,6 @@ struct BasalEnergyChartView: View {
             }
             .frame(height: 240)
             
-            
-            
-            // 🔻 вот это добавляем
             if weekTotalKcal > 0 {
                 Text("С начала недели: \(Int(weekTotalKcal)) ккал")
                     .font(.subheadline)
@@ -236,7 +275,6 @@ struct BasalEnergyChartView: View {
             }
         }
         .padding()
-        // при первом показе загружаем данные для выбранного периода
         .task {
             await loadData()
         }
@@ -244,24 +282,4 @@ struct BasalEnergyChartView: View {
             Task { await loadData() }
         }
     }
-
-//    // MARK: - Временный генератор мок-данных
-//
-//    private func makeMockData(for period: BasalChartPeriod) -> [BasalEnergyPoint] {
-//        let calendar = Calendar.current
-//        let today = calendar.startOfDay(for: Date())
-//
-//        // последние N дней, от старых к новым
-//        let days = period.days
-//
-//        return (0..<days).compactMap { offset in
-//            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else {
-//                return nil
-//            }
-//            // условно базальный расход: вокруг 1700 ккал с шумом ±200
-//            let value = 1700 + Double.random(in: -200...200)
-//            return BasalEnergyPoint(date: date, basalKcal: value)
-//        }
-//        .sorted { $0.date < $1.date }
-//    }
 }
