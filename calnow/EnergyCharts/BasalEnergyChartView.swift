@@ -117,12 +117,15 @@ struct AverageEnergyChartView: View {
             
             // Базальный
             if averageBasal > 0, let domain = xDomain {
-                AreaMark(
-                    x: .value("Дата", domain.lowerBound),
-                    x2: .value("Дата", domain.upperBound),
-                    yStart: .value("Нижняя граница", 0),
-                    yEnd: .value("Среднее", averageBasal)
-                )
+                let bandDates = [domain.lowerBound, domain.upperBound]
+                
+                ForEach(bandDates, id: \.self) { date in
+                    AreaMark(
+                        x: .value("Дата", date),
+                        yStart: .value("Нижняя граница", 0),
+                        yEnd: .value("Среднее", averageBasal)
+                    )
+                }
                 .foregroundStyle(Color.blue.opacity(0.15))
                 
                 RuleMark(
