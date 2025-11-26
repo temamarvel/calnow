@@ -74,6 +74,23 @@ struct BasalEnergyChartView: View {
         }
     }
 
+    private var weekTotalKcal: Double {
+        let calendar = Calendar.current
+        
+        // интервал текущей недели по локали (startOfWeek...startOfNextWeek)
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: Date()) else {
+            return 0
+        }
+        
+        // суммируем total только для точек внутри этой недели
+        return totalPoints
+            .filter { point in
+                let day = calendar.startOfDay(for: point.date)
+                return weekInterval.contains(day)
+            }
+            .reduce(0) { $0 + $1.totalKcal }
+    }
+    
     // вычисляем среднее по текущим точкам
     private var averageBasal: Double {
         guard !basalPoints.isEmpty else { return 0 }
@@ -208,6 +225,15 @@ struct BasalEnergyChartView: View {
                 AxisMarks()
             }
             .frame(height: 240)
+            
+            
+            
+            // 🔻 вот это добавляем
+            if weekTotalKcal > 0 {
+                Text("С начала недели: \(Int(weekTotalKcal)) ккал")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding()
         // при первом показе загружаем данные для выбранного периода
