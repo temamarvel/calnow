@@ -341,7 +341,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
             return totalKcal / Double(dayCount)
         }
     
-    func basalEnergyPoints(for period: BasalChartPeriod) async throws -> [BasalEnergyPoint] {
+    func basalEnergyPoints(for period: BasalChartPeriod) async throws -> [EnergyPoint] {
         let calendar = Calendar.current
         let end = Date()
         let start = calendar.date(byAdding: .day, value: -period.days, to: calendar.startOfDay(for: end))!
@@ -351,12 +351,12 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         let buckets = try await dailyBuckets(for: .basalEnergyBurned, in: interval)
 
         return buckets.map { (date, kcal) in
-            BasalEnergyPoint(date: date, basalKcal: kcal)
+            EnergyPoint(date: date, kcal: kcal)
         }
         .sorted { $0.date < $1.date }
     }
     
-    func activeEnergyPoints(for period: BasalChartPeriod) async throws -> [ActiveEnergyPoint] {
+    func activeEnergyPoints(for period: BasalChartPeriod) async throws -> [EnergyPoint] {
         let calendar = Calendar.current
         let end = Date()
         let start = calendar.date(byAdding: .day, value: -period.days, to: calendar.startOfDay(for: end))!
@@ -366,7 +366,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         let buckets = try await dailyBuckets(for: .activeEnergyBurned, in: interval)
 
         return buckets.map { (date, kcal) in
-            ActiveEnergyPoint(date: date, activeKcal: kcal)
+            EnergyPoint(date: date, kcal: kcal)
         }
         .sorted { $0.date < $1.date }
     }

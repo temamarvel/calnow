@@ -1,22 +1,10 @@
 import SwiftUI
 import Charts
 
-struct BasalEnergyPoint: Identifiable {
+struct EnergyPoint: Identifiable {
     let id = UUID()
     let date: Date
-    let basalKcal: Double
-}
-
-struct ActiveEnergyPoint: Identifiable {
-    let id = UUID()
-    let date: Date
-    let activeKcal: Double
-}
-
-struct TotalEnergyPoint: Identifiable {
-    let id = UUID()
-    let date: Date
-    let totalKcal: Double
+    let kcal: Double
 }
 
 enum BasalChartPeriod: String, CaseIterable, Identifiable {
@@ -48,60 +36,91 @@ enum BasalChartPeriod: String, CaseIterable, Identifiable {
 }
 
 struct DailyEnergyChartView: View {
-    let basalPoints: [BasalEnergyPoint]
-    let activePoints: [ActiveEnergyPoint]
-    let totalPoints: [TotalEnergyPoint]
+    let basalPoints: [EnergyPoint]
+    let activePoints: [EnergyPoint]
+    let totalPoints: [EnergyPoint]
+    
+    @State private var selectedPoint: EnergyPoint?
     
     var body: some View {
-        Chart {
-            // Базальный
-            ForEach(basalPoints) { point in
-                LineMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.basalKcal)
-                )
-                .interpolationMethod(.catmullRom)
+        VStack{
+            Chart {
+                // Базальный
+                ForEach(basalPoints) { point in
+                    LineMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    
+                    PointMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .symbolSize(20)
+                }
+                .foregroundStyle(by: .value("Серия", "Базальный"))
                 
-                PointMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.basalKcal)
-                )
-                .symbolSize(20)
-            }
-            .foregroundStyle(by: .value("Серия", "Базальный"))
-            
-            // Активный
-            ForEach(activePoints) { point in
-                LineMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.activeKcal)
-                )
-                .interpolationMethod(.catmullRom)
+                // Активный
+                ForEach(activePoints) { point in
+                    LineMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    
+                    PointMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .symbolSize(20)
+                }
+                .foregroundStyle(by: .value("Серия", "Активный"))
                 
-                PointMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.activeKcal)
-                )
-                .symbolSize(20)
+                // Итоговый
+                ForEach(totalPoints) { point in
+                    LineMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    
+                    PointMark(
+                        x: .value("Дата", point.date),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .symbolSize(selectedPoint?.id == point.id ? 100 : 20)
+                }
+                .foregroundStyle(by: .value("Серия", "Итоговый"))
             }
-            .foregroundStyle(by: .value("Серия", "Активный"))
-            
-            // Итоговый
-            ForEach(totalPoints) { point in
-                LineMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.totalKcal)
-                )
-                .interpolationMethod(.catmullRom)
-                
-                PointMark(
-                    x: .value("Дата", point.date),
-                    y: .value("Ккал/день", point.totalKcal)
-                )
-                .symbolSize(20)
+            .chartOverlay { proxy in
+                GeometryReader { geo in
+                    // Прозрачный слой, принимающий жесты
+                    Rectangle()
+                        .fill(.clear)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            SpatialTapGesture()
+                                .onEnded { value in
+                                    let location = value.location
+                                    
+                                    // Получаем значение X (дату) на том месте, где тапнули
+                                    if let date: Date = proxy.value(atX: location.x) {
+                                        // Находим ближайшую точку к этой дате
+                                        if let nearest = totalPoints.min(by: {
+                                            abs($0.date.timeIntervalSince(date)) <
+                                                abs($1.date.timeIntervalSince(date))
+                                        }) {
+                                            selectedPoint = nearest
+                                        }
+                                    }
+                                }
+                        )
+                }
             }
-            .foregroundStyle(by: .value("Серия", "Итоговый"))
         }
+        
+        Text("selectedPoint\(selectedPoint)")
     }
 }
 
@@ -191,28 +210,28 @@ struct AverageEnergyChartView: View {
 }
 
 struct EnergyChartView: View {
-    let basalPoints: [BasalEnergyPoint]
-    let activePoints: [ActiveEnergyPoint]
-    let totalPoints: [TotalEnergyPoint]
+    let basalPoints: [EnergyPoint]
+    let activePoints: [EnergyPoint]
+    let totalPoints: [EnergyPoint]
     let showDailyChart: Bool
     
     // MARK: - Aggregates
     
     private var averageBasal: Double {
         guard !basalPoints.isEmpty else { return 0 }
-        let sum = basalPoints.reduce(0) { $0 + $1.basalKcal }
+        let sum = basalPoints.reduce(0) { $0 + $1.kcal }
         return sum / Double(basalPoints.count)
     }
     
     private var averageActive: Double {
         guard !activePoints.isEmpty else { return 0 }
-        let sum = activePoints.reduce(0) { $0 + $1.activeKcal }
+        let sum = activePoints.reduce(0) { $0 + $1.kcal }
         return sum / Double(activePoints.count)
     }
     
     private var averageTotal: Double {
         guard !totalPoints.isEmpty else { return 0 }
-        let sum = totalPoints.reduce(0) { $0 + $1.totalKcal }
+        let sum = totalPoints.reduce(0) { $0 + $1.kcal }
         return sum / Double(totalPoints.count)
     }
     
@@ -258,8 +277,8 @@ struct EnergyChartView: View {
 
 struct BasalEnergyChartView: View {
     @State private var period: BasalChartPeriod = .week
-    @State private var basalPoints: [BasalEnergyPoint] = []
-    @State private var activePoints: [ActiveEnergyPoint] = []
+    @State private var basalPoints: [EnergyPoint] = []
+    @State private var activePoints: [EnergyPoint] = []
     
     @State private var showDailyChart: Bool = false
     
@@ -275,27 +294,27 @@ struct BasalEnergyChartView: View {
     }
     
     // Общие totalPoints — используем тут и отдаём в чарт
-    private var totalPoints: [TotalEnergyPoint] {
+    private var totalPoints: [EnergyPoint] {
         let calendar = Calendar.current
         
         let basalByDate = Dictionary(
             uniqueKeysWithValues: basalPoints.map { point in
-                (calendar.startOfDay(for: point.date), point.basalKcal)
+                (calendar.startOfDay(for: point.date), point.kcal)
             }
         )
         
         let activeByDate = Dictionary(
             uniqueKeysWithValues: activePoints.map { point in
-                (calendar.startOfDay(for: point.date), point.activeKcal)
+                (calendar.startOfDay(for: point.date), point.kcal)
             }
         )
         
         let allDates = Set(basalByDate.keys).union(activeByDate.keys)
         
-        let result: [TotalEnergyPoint] = allDates.map { date in
+        let result: [EnergyPoint] = allDates.map { date in
             let basal = basalByDate[date] ?? 0
             let active = activeByDate[date] ?? 0
-            return TotalEnergyPoint(date: date, totalKcal: basal + active)
+            return EnergyPoint(date: date, kcal: basal + active)
         }
         
         return result.sorted { $0.date < $1.date }
@@ -314,7 +333,7 @@ struct BasalEnergyChartView: View {
                 let day = calendar.startOfDay(for: point.date)
                 return weekInterval.contains(day)
             }
-            .reduce(0) { $0 + $1.totalKcal }
+            .reduce(0) { $0 + $1.kcal }
     }
     
     var body: some View {
