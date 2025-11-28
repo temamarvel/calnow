@@ -32,7 +32,7 @@ struct MainDashboardView: View {
     private func loadActualTotal() async {
         do {
             actualTotal = try await healthKitManager.fetchTotalEnergyToday()
-            averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
+            //averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -56,16 +56,21 @@ struct MainDashboardView: View {
                     CircleProgressView(progress: actualTotal!/plannedTotal)
                     
                     VStack{
-                        Text("\(Int(actualTotal!))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                        Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
                         
                         Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
                         
                         Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                        
+                        Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                        
+                        Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                        
                     }.fixedSize(horizontal: true, vertical: false)
                 }
                 
                 
-                Text("Avarage \(averageTotal)")
+                //Text("Avarage \(averageTotal)")
                 
                 Spacer()
             }

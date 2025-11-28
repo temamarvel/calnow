@@ -15,7 +15,8 @@ enum DashboardTab { case current, charts }
 struct DashboardRootContainer: View {
     @EnvironmentObject private var hk : HealthKitManager
     var body: some View {
-        DashboardRootView(health: hk) // ← передаём зависимость
+        Text("Test")
+        //DashboardRootView(health: hk) // ← передаём зависимость
     }
 }
 
@@ -64,15 +65,15 @@ struct DashboardRootView: View {
                     }
                 }
             }
-            .onAppear {
-                // лениво подгрузим данные
-                if currentVM.profile == nil {
-                    currentVM.onAppear(context: modelContext)
-                }
-                if chartsVM.series.isEmpty {
-                    chartsVM.onAppear()
-                }
-            }
+//            .onAppear {
+//                // лениво подгрузим данные
+//                if currentVM.profile == nil {
+//                    currentVM.onAppear(context: modelContext)
+//                }
+//                if chartsVM.series.isEmpty {
+//                    chartsVM.onAppear()
+//                }
+//            }
         }
     }
 }
