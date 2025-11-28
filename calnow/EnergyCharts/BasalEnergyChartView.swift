@@ -45,53 +45,54 @@ struct DailyEnergyChartView: View {
     var body: some View {
         VStack{
             Chart {
-                // Базальный
-                ForEach(basalPoints) { point in
-                    LineMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Ккал/день", point.kcal)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Ккал/день", point.kcal)
-                    )
-                    .symbolSize(20)
-                }
-                .foregroundStyle(by: .value("Серия", "Базальный"))
+//                // Базальный
+//                ForEach(basalPoints) { point in
+//                    BarMark(
+//                        x: .value("Дата", point.date),
+//                        y: .value("Ккал/день", point.kcal)
+//                    )
+//                    .interpolationMethod(.catmullRom)
+//                    
+//                    PointMark(
+//                        x: .value("Дата", point.date),
+//                        y: .value("Ккал/день", point.kcal)
+//                    )
+//                    .symbolSize(20)
+//                }
+//                .foregroundStyle(by: .value("Серия", "Базальный"))
                 
-                // Активный
-                ForEach(activePoints) { point in
-                    LineMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Ккал/день", point.kcal)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Ккал/день", point.kcal)
-                    )
-                    .symbolSize(20)
-                }
-                .foregroundStyle(by: .value("Серия", "Активный"))
+//                // Активный
+//                ForEach(activePoints) { point in
+//                    LineMark(
+//                        x: .value("Дата", point.date),
+//                        y: .value("Ккал/день", point.kcal)
+//                    )
+//                    .interpolationMethod(.catmullRom)
+//                    
+//                    PointMark(
+//                        x: .value("Дата", point.date),
+//                        y: .value("Ккал/день", point.kcal)
+//                    )
+//                    .symbolSize(20)
+//                }
+//                .foregroundStyle(by: .value("Серия", "Активный"))
                 
                 // Итоговый
                 ForEach(totalPoints) { point in
-                    LineMark(
+                    BarMark(
                         x: .value("Дата", point.date),
                         y: .value("Ккал/день", point.kcal)
                     )
-                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(selectedPoint?.id == point.id ? .orange : .blue)
+                    //.interpolationMethod(.catmullRom)
                     
-                    PointMark(
-                        x: .value("Дата", point.date),
-                        y: .value("Ккал/день", point.kcal)
-                    )
-                    .symbolSize(selectedPoint?.id == point.id ? 100 : 20)
+//                    PointMark(
+//                        x: .value("Дата", point.date),
+//                        y: .value("Ккал/день", point.kcal)
+//                    )
+//                    .symbolSize(selectedPoint?.id == point.id ? 100 : 20)
                 }
-                .foregroundStyle(by: .value("Серия", "Итоговый"))
+                //.foregroundStyle(by: .value("Серия", "Итоговый"))
             }
             .chartOverlay { proxy in
                 GeometryReader { geo in
@@ -260,11 +261,11 @@ struct EnergyChartView: View {
                 )
             }
         }
-        .chartForegroundStyleScale([
-            "Базальный": Color.blue,
-            "Активный": Color.orange,
-            "Итоговый": Color.purple
-        ])
+//        .chartForegroundStyleScale([
+//            "Базальный": Color.blue,
+//            "Активный": Color.orange,
+//            "Итоговый": Color.purple
+//        ])
         .chartXAxis {
             AxisMarks(values: .automatic(desiredCount: 4))
         }
