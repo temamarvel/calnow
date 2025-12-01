@@ -32,7 +32,7 @@ struct MainDashboardView: View {
     private func loadActualTotal() async {
         do {
             actualTotal = try await healthKitManager.fetchTotalEnergyToday()
-            //averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
+            averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -68,9 +68,6 @@ struct MainDashboardView: View {
                         
                     }.fixedSize(horizontal: true, vertical: false)
                 }
-                
-                
-                //Text("Avarage \(averageTotal)")
                 
                 Spacer()
             }

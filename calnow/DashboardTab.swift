@@ -15,8 +15,7 @@ enum DashboardTab { case current, charts }
 struct DashboardRootContainer: View {
     @EnvironmentObject private var hk : HealthKitManager
     var body: some View {
-        Text("Test")
-        //DashboardRootView(health: hk) // ← передаём зависимость
+        DashboardRootView(health: hk) // ← передаём зависимость
     }
 }
 
@@ -24,17 +23,7 @@ struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var tab: DashboardTab = .current
     
-    
-    init(health: HealthKitServicing) {
-        //_vm = StateObject(wrappedValue: OnboardingViewModel(health: health))
-        _currentVM = StateObject(wrappedValue: MainDashboardViewModel(health: health))
-        _chartsVM = StateObject(wrappedValue: EnergyChartsViewModel(health: health))
-        
-    }
-
-    // VM’ки вкладок
-    @StateObject private var currentVM: MainDashboardViewModel
-    @StateObject private var chartsVM: EnergyChartsViewModel
+    init(health: HealthKitServicing) { }
 
     var body: some View {
         NavigationStack {
@@ -65,15 +54,6 @@ struct DashboardRootView: View {
                     }
                 }
             }
-//            .onAppear {
-//                // лениво подгрузим данные
-//                if currentVM.profile == nil {
-//                    currentVM.onAppear(context: modelContext)
-//                }
-//                if chartsVM.series.isEmpty {
-//                    chartsVM.onAppear()
-//                }
-//            }
         }
     }
 }
