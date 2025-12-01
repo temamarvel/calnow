@@ -23,6 +23,9 @@ extension Color {
         self.init(red: red, green: green, blue: blue)
     }
     
+    //static let appBackground = Color("AppBackground")
+    
+    
     static let sunsetOrange = Color(hex: "#FF7E3E")
     static let sunsetDeep = Color(hex: "#E56A2E")
     static let pacific = Color(hex: "#1C9CA6")

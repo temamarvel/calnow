@@ -43,63 +43,68 @@ struct MainDashboardView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
+            ZStack{
+                Color.appBackground
+                    .ignoresSafeArea()
                 
-                
-                if profile == nil {
-                    Text("Профиль не заполнен")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                
-                ZStack{
-                    CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)
+                VStack(alignment: .leading, spacing: 16) {
                     
-                    VStack{
-                        Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                    
+                    if profile == nil {
+                        Text("Профиль не заполнен")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    ZStack{
+                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)
                         
-                        Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
-                        
-                        Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
-                        
-                        Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
-                        
-                        Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
-                        
-                    }.fixedSize(horizontal: true, vertical: false)
+                        VStack{
+                            Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                            
+                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                            
+                            Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                            
+                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                            
+                            Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                            
+                        }.fixedSize(horizontal: true, vertical: false)
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding()
+                .navigationTitle("Сегодня")
+                .task {
+                    await loadActualTotal()
+                }
+                //            .toolbar {
+                //                ToolbarItem(placement: .primaryAction) {
+                //                    Button {
+                //                        vm.refreshToday()
+                //                    } label: {
+                //                        if vm.isLoading {
+                //                            ProgressView()
+                //                        } else {
+                //                            Image(systemName: "arrow.clockwise")
+                //                        }
+                //                    }
+                //                    .accessibilityLabel("Обновить данные за сегодня")
+                //                    .disabled(vm.isLoading)
+                //                }
+                //            }
+                //            .onAppear { vm.onAppear(context: modelContext) }
+                //            .alert("Ошибка", isPresented: Binding(
+                //                get: { vm.alertMessage != nil },
+                //                set: { if !$0 { vm.alertMessage = nil } }
+                //            )) {
+                //                Button("OK", role: .cancel) { }
+                //            } message: {
+                //                Text(vm.alertMessage ?? "")
+                //            }
             }
-            .padding()
-            .navigationTitle("Сегодня")
-            .task {
-                await loadActualTotal()
-            }
-//            .toolbar {
-//                ToolbarItem(placement: .primaryAction) {
-//                    Button {
-//                        vm.refreshToday()
-//                    } label: {
-//                        if vm.isLoading {
-//                            ProgressView()
-//                        } else {
-//                            Image(systemName: "arrow.clockwise")
-//                        }
-//                    }
-//                    .accessibilityLabel("Обновить данные за сегодня")
-//                    .disabled(vm.isLoading)
-//                }
-//            }
-//            .onAppear { vm.onAppear(context: modelContext) }
-//            .alert("Ошибка", isPresented: Binding(
-//                get: { vm.alertMessage != nil },
-//                set: { if !$0 { vm.alertMessage = nil } }
-//            )) {
-//                Button("OK", role: .cancel) { }
-//            } message: {
-//                Text(vm.alertMessage ?? "")
-//            }
         }
     }
 }
