@@ -53,7 +53,7 @@ struct MainDashboardView: View {
                 }
                 
                 ZStack{
-                    CircleProgressView(progress: actualTotal!/plannedTotal)
+                    CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)
                     
                     VStack{
                         Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
