@@ -34,6 +34,8 @@ extension Color {
     static let bgElevated = Color(hex: "#F5F3EF")
     static let card = Color(hex: "#FFFFFF")
     static let cardSecondary = Color(hex: "#F6F3EB")
+    static let bgDark = Color(hex: "#111315")
+    static let surfaceDark = Color(hex: "#1A1C1E")
     
     
     // отдельные цвета (удобно переиспользовать)
