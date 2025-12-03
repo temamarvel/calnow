@@ -42,18 +42,18 @@ extension Color {
     
     
     // отдельные цвета (удобно переиспользовать)
-    static let surfCoral   = Color(hex: "#E86A5B")
-    static let surfOrange  = Color(hex: "#FF7E3E")
-    static let surfSand    = Color(hex: "#F4D27A")
-    static let surfPalm    = Color(hex: "#6DAA6E")
-    static let surfPacific = Color(hex: "#1C9CA6")
+//    static let surfCoral   = Color(hex: "#E86A5B")
+//    static let surfOrange  = Color(hex: "#FF7E3E")
+//    static let surfSand    = Color(hex: "#F4D27A")
+//    static let surfPalm    = Color(hex: "#6DAA6E")
+//    static let surfPacific = Color(hex: "#1C9CA6")
     
     // сам градиент (массив цветов)
     static let surfProgressGradient: [Color] = [
-        .surfCoral,
-        .surfOrange,
-        .surfSand,
-        .surfPalm,
-        .surfPacific
+        .appSurfCoral,
+        .appSurfOrange,
+        .appSurfSand,
+        .appSurfPalm,
+        .appSurfPacific
     ]
 }

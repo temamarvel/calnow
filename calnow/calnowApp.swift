@@ -6,17 +6,21 @@ struct RootView: View {
     @State private var showOnboarding: Bool? = nil
     var body: some View {
         Group {
-            if let showOnboarding {
-                if showOnboarding {
-                    OnboardingMainView {
-                        self.showOnboarding = false
+            ZStack{
+                Color.appBackground
+                    .ignoresSafeArea()
+                if let showOnboarding {
+                    if showOnboarding {
+                        OnboardingMainView {
+                            self.showOnboarding = false
+                        }
+                    } else {
+                        DashboardRootContainer()
                     }
                 } else {
-                    DashboardRootContainer()
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-            } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .task {
