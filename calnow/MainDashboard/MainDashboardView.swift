@@ -57,7 +57,8 @@ struct MainDashboardView: View {
                     }
                     
                     ZStack{
-                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)    .padding(24)
+                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
+                        enableGlow: true)    .padding(24)
                             .background(
                                 RoundedRectangle(cornerRadius: 52, style: .continuous)
                                     .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
