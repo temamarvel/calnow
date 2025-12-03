@@ -57,7 +57,11 @@ struct MainDashboardView: View {
                     }
                     
                     ZStack{
-                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)
+                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient)    .padding(24)
+                            .background(
+                                RoundedRectangle(cornerRadius: 52, style: .continuous)
+                                    .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+                            ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
                         
                         VStack{
                             Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
