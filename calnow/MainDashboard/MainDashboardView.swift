@@ -56,27 +56,47 @@ struct MainDashboardView: View {
                             .foregroundStyle(.secondary)
                     }
                     
-                    ZStack{
-                        CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
-                        enableGlow: true)    .padding(24)
-                            .background(
-                                RoundedRectangle(cornerRadius: 52, style: .continuous)
-                                    .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
-                            ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
-                        
-                        VStack{
-                            Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                    VStack{
+                        ZStack{
+                            CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
+                                               enableGlow: true)
+                            VStack{
+                                Text("\(Int(plannedTotal - (actualTotal ?? 0)))")
+                                    .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.secondary)
+                            }
                             
-                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                        }
+                        
+                        HStack{
+                            Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold)
+                                .padding(20)
+                                .foregroundStyle(.secondary)
+                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            
+//                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
                             
                             Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                                .padding(20)
+                                .foregroundStyle(.secondary)
+                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             
-                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+//                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
                             
                             Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                                .padding(20)
+                                .foregroundStyle(.secondary)
+                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             
-                        }.fixedSize(horizontal: true, vertical: false)
+                        }
+                        //.fixedSize(horizontal: true, vertical: false)
                     }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 52, style: .continuous)
+                            .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+                    ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
                     
                     Spacer()
                 }
