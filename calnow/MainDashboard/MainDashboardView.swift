@@ -74,24 +74,31 @@ struct MainDashboardView: View {
                             
                         }
                         
-                        HStack{
-                            Text("\(Int(actualTotal ?? 0))").font(.title).fontWeight(.bold)
-                                .padding(20)
-                                .foregroundStyle(.secondary)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        VStack{
+                            VStack(alignment: .leading){
+                                Text("Потрачено").font(.headline)
+                                    .foregroundStyle(.secondary)
+                                Text("\(Int(actualTotal ?? 0)) / \(Int(tdee)) ").font(.title).fontWeight(.bold)
+                                    .foregroundStyle(.secondary)
+                            }.padding(20)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             
 //                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
                             
-                            Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
-                                .padding(20)
-                                .foregroundStyle(.secondary)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+//                            Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+//                                .padding(20)
+//                                .foregroundStyle(.secondary)
+//                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             
 //                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
-                            
-                            Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                            VStack(alignment: .leading){
+                                Text("Среднее за неделю").font(.headline)
+                                    .foregroundStyle(.secondary)
+                                Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
+                            }
                                 .padding(20)
-                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             
                         }
