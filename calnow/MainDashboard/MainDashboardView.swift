@@ -16,7 +16,7 @@ struct DetailCardView: View {
                 .foregroundStyle(.secondary)
         }.padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -70,80 +70,82 @@ struct MainDashboardView: View {
     
     var body: some View {
         NavigationStack {
+            
             ZStack{
                 Color.appBackground
                     .ignoresSafeArea()
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    
-                    
-                    if profile == nil {
-                        Text("Профиль не заполнен")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    VStack{
-                        ZStack{
-                            CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
-                                               enableGlow: true)
-                            VStack{
-                                Text("\(remainingTotal)")
-                                    .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(.secondary)
-                            }
-                            
+                ScrollView{
+                    VStack(alignment: .leading, spacing: 16) {
+                        
+                        
+                        if profile == nil {
+                            Text("Профиль не заполнен")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
                         }
                         
                         VStack{
-                            DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
+                            ZStack{
+                                CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
+                                                   enableGlow: true)
+                                VStack{
+                                    Text("\(remainingTotal)")
+                                        .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                            }
                             
-                            DetailCardView(value: "\(Int(averageTotal ?? 0))", description: "Среднее за месяц")
-                            
-                            DetailCardView(value: "\(Int(averageTotal2 ?? 0))", description: "Среднее за 7 дней")
-                            
-                            DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Сумма за 7 дней")
-
+                            VStack{
+                                DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
+                                
+                                DetailCardView(value: "\(Int(averageTotal ?? 0))", description: "Среднее за месяц")
+                                
+                                DetailCardView(value: "\(Int(averageTotal2 ?? 0))", description: "Среднее за 7 дней")
+                                
+                                DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Сумма за 7 дней")
+                                
+                            }
                         }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 52, style: .continuous)
+                                .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+                        ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
+                        
+                        //Spacer()
                     }
                     .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 52, style: .continuous)
-                            .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
-                    ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
-                    
-                    Spacer()
+                    .navigationTitle("Сегодня")
+                    .task {
+                        await loadActualTotal()
+                    }
+                    //            .toolbar {
+                    //                ToolbarItem(placement: .primaryAction) {
+                    //                    Button {
+                    //                        vm.refreshToday()
+                    //                    } label: {
+                    //                        if vm.isLoading {
+                    //                            ProgressView()
+                    //                        } else {
+                    //                            Image(systemName: "arrow.clockwise")
+                    //                        }
+                    //                    }
+                    //                    .accessibilityLabel("Обновить данные за сегодня")
+                    //                    .disabled(vm.isLoading)
+                    //                }
+                    //            }
+                    //            .onAppear { vm.onAppear(context: modelContext) }
+                    //            .alert("Ошибка", isPresented: Binding(
+                    //                get: { vm.alertMessage != nil },
+                    //                set: { if !$0 { vm.alertMessage = nil } }
+                    //            )) {
+                    //                Button("OK", role: .cancel) { }
+                    //            } message: {
+                    //                Text(vm.alertMessage ?? "")
+                    //            }
                 }
-                .padding()
-                .navigationTitle("Сегодня")
-                .task {
-                    await loadActualTotal()
-                }
-                //            .toolbar {
-                //                ToolbarItem(placement: .primaryAction) {
-                //                    Button {
-                //                        vm.refreshToday()
-                //                    } label: {
-                //                        if vm.isLoading {
-                //                            ProgressView()
-                //                        } else {
-                //                            Image(systemName: "arrow.clockwise")
-                //                        }
-                //                    }
-                //                    .accessibilityLabel("Обновить данные за сегодня")
-                //                    .disabled(vm.isLoading)
-                //                }
-                //            }
-                //            .onAppear { vm.onAppear(context: modelContext) }
-                //            .alert("Ошибка", isPresented: Binding(
-                //                get: { vm.alertMessage != nil },
-                //                set: { if !$0 { vm.alertMessage = nil } }
-                //            )) {
-                //                Button("OK", role: .cancel) { }
-                //            } message: {
-                //                Text(vm.alertMessage ?? "")
-                //            }
             }
         }
     }
@@ -152,21 +154,21 @@ struct MainDashboardView: View {
 struct MainDashboardPreviewWrapper: View {
     let container: ModelContainer
     @StateObject private var healthManager = HealthKitManager()
-
+    
     init() {
         // in-memory контейнер
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         container = try! ModelContainer(for: UserProfile.self, configurations: config)
-
+        
         let context = container.mainContext
-
+        
         // тестовый профиль — подгони под свою модель
         let profile = UserProfile()
-//        profile.bmr = 1700
-//        profile.tdee = 2600
+        //        profile.bmr = 1700
+        //        profile.tdee = 2600
         context.insert(profile)
     }
-
+    
     var body: some View {
         MainDashboardView()
             .modelContainer(container)
