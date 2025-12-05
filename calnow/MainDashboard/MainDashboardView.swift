@@ -25,6 +25,11 @@ struct MainDashboardView: View {
         tdee
     }
     
+    private var remainingTotal: Int {
+        let delta = plannedTotal - (actualTotal ?? 0)
+        return delta <= 0 ? 0 : Int(delta)
+    }
+    
     // Факт: возьми это из HealthKitManager, когда будет готово
     @State private var actualTotal: Double? = 1900
     @State private var averageTotal: Double? = 0
@@ -61,7 +66,7 @@ struct MainDashboardView: View {
                             CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
                                                enableGlow: true)
                             VStack{
-                                Text("\(Int(plannedTotal - (actualTotal ?? 0)))")
+                                Text("\(remainingTotal)")
                                     .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
                                     .fontWeight(.bold)
                                     .foregroundStyle(.secondary)
