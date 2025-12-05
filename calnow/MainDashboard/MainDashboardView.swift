@@ -2,6 +2,24 @@ import SwiftUI
 import SwiftData
 import CircleProgressBar
 
+
+struct DetailCardView: View {
+    let value: String
+    let description: String
+    
+    
+    var body: some View {
+        VStack(alignment: .leading){
+            Text(description).font(.headline)
+                .foregroundStyle(.secondary)
+            Text(value).font(.title).fontWeight(.bold)
+                .foregroundStyle(.secondary)
+        }.padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+}
+
 // MARK: - MainDashboardView (использует секции)
 struct MainDashboardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -33,11 +51,15 @@ struct MainDashboardView: View {
     // Факт: возьми это из HealthKitManager, когда будет готово
     @State private var actualTotal: Double? = 1900
     @State private var averageTotal: Double? = 0
+    @State private var averageTotal2: Double? = 0
+    @State private var weekTotal: Double? = 0
     
     private func loadActualTotal() async {
         do {
             actualTotal = try await healthKitManager.fetchTotalEnergyToday()
             averageTotal = try await healthKitManager.fetchAverageDailyEnergy(window: .last30Days)
+            averageTotal2 = try await healthKitManager.fetchAverageDailyEnergy(window: .last7Days)
+            weekTotal = try await healthKitManager.fetchDailyEnergy(window: .last7Days)
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -75,34 +97,15 @@ struct MainDashboardView: View {
                         }
                         
                         VStack{
-                            VStack(alignment: .leading){
-                                Text("Потрачено").font(.headline)
-                                    .foregroundStyle(.secondary)
-                                Text("\(Int(actualTotal ?? 0)) / \(Int(tdee)) ").font(.title).fontWeight(.bold)
-                                    .foregroundStyle(.secondary)
-                            }.padding(20)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
                             
-//                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
+                            DetailCardView(value: "\(Int(averageTotal ?? 0))", description: "Среднее за месяц")
                             
-//                            Text("\(Int(plannedTotal))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
-//                                .padding(20)
-//                                .foregroundStyle(.secondary)
-//                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            DetailCardView(value: "\(Int(averageTotal2 ?? 0))", description: "Среднее за 7 дней")
                             
-//                            Divider().frame(height: 5).overlay(.pink).clipShape(.capsule)
-                            VStack(alignment: .leading){
-                                Text("Среднее за неделю").font(.headline)
-                                    .foregroundStyle(.secondary)
-                                Text("\(Int(averageTotal ?? 0))").font(.title).fontWeight(.bold).foregroundStyle(.secondary)
-                            }
-                                .padding(20)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                            
+                            DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Сумма за 7 дней")
+
                         }
-                        //.fixedSize(horizontal: true, vertical: false)
                     }
                     .padding()
                     .background(

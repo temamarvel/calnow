@@ -340,6 +340,78 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
             guard dayCount > 0 else { return 0 }
             return totalKcal / Double(dayCount)
         }
+        
+    func fetchDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
+        let cal = Calendar.current
+
+        let endDay = cal.startOfDay(for: Date())
+        guard let startDay = cal.date(byAdding: .day,
+                                      value: -window.days + 1,
+                                      to: endDay) else {
+            return 0
+        }
+
+        let interval = DateInterval(start: startDay, end: endDay)
+
+        // Типы
+        guard let activeType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+              let basalType  = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned) else {
+            return 0
+        }
+
+        // ACTIVE
+        let activePredicate = HKSamplePredicate.quantitySample(
+            type: activeType,
+            predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
+        )
+
+        let activeDesc = HKStatisticsCollectionQueryDescriptor(
+            predicate: activePredicate,
+            options: .cumulativeSum,
+            anchorDate: cal.startOfDay(for: interval.start),
+            intervalComponents: DateComponents(day: 1)
+        )
+
+        let activeCollection = try await activeDesc.result(for: healthStore)
+
+        // BASAL
+        let basalPredicate = HKSamplePredicate.quantitySample(
+            type: basalType,
+            predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
+        )
+
+        let basalDesc = HKStatisticsCollectionQueryDescriptor(
+            predicate: basalPredicate,
+            options: .cumulativeSum,
+            anchorDate: cal.startOfDay(for: interval.start),
+            intervalComponents: DateComponents(day: 1)
+        )
+
+        let basalCollection = try await basalDesc.result(for: healthStore)
+
+        // Сборка дневных значений
+        var dayCount = 0
+        var totalKcal: Double = 0
+        let unit = HKUnit.kilocalorie()
+
+        for dayStart in interval.daysSequence() {
+            let activeStats = activeCollection.statistics(for: dayStart)
+            let basalStats  = basalCollection.statistics(for: dayStart)
+
+            let active = activeStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
+            let basal  = basalStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
+
+            let dayTotal = active + basal
+            if dayTotal > 0 {
+                dayCount += 1
+                totalKcal += dayTotal
+            }
+        }
+
+        guard dayCount > 0 else { return 0 }
+        return totalKcal
+    }
+    
     
     func basalEnergyPoints(for period: BasalChartPeriod) async throws -> [EnergyPoint] {
         let calendar = Calendar.current
