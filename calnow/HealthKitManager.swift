@@ -192,8 +192,8 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     private func dailyBuckets(
         for id: HKQuantityTypeIdentifier,
         in interval: DateInterval
-    ) async throws -> [(date: Date, kcal: Double)] {
-        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return [] }
+    ) async throws -> [Date : Double] {
+        guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return [:] }
         let cal = Calendar.current
         
         let predicate = HKSamplePredicate.quantitySample(
@@ -210,12 +210,15 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         )
         
         let collection = try await statsDesc.result(for: healthStore)
-        var result: [(Date, Double)] = []
+        
+        var result: [Date: Double] = [:]
+        
         collection.enumerateStatistics(from: interval.start, to: interval.end) { stats, _ in
             let date = stats.startDate
             let kcal = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
-            result.append((date, kcal))
+            result[date] = kcal
         }
+        
         return result
     }
     
@@ -223,19 +226,13 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         async let active = dailyBuckets(for: .activeEnergyBurned, in: interval)
         async let basal  = dailyBuckets(for: .basalEnergyBurned,  in: interval)
         
-        let (a, b) = try await (active, basal)
-        
-        // слить по дате
-        let byDateA = Dictionary(uniqueKeysWithValues: a.map { ($0.date, $0.kcal) })
-        let byDateB = Dictionary(uniqueKeysWithValues: b.map { ($0.date, $0.kcal) })
-        
         // итерируем по дням интервала, чтобы были все дни (даже пустые)
         var points: [DayEnergyPoint] = []
         var day = Calendar.current.startOfDay(for: interval.start)
         let end = interval.end
         while day <= end {
-            let aVal = byDateA[day] ?? 0
-            let bVal = byDateB[day] ?? 0
+            let aVal = try await active[day] ?? 0
+            let bVal = try await basal[day] ?? 0
             points.append(DayEnergyPoint(date: day, activeKcal: aVal, basalKcal: bVal))
             day = Calendar.current.date(byAdding: .day, value: 1, to: day)!
         }
