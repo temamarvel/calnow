@@ -116,31 +116,6 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         return meters * 100.0
     }
 
-    // MARK: - Получение возраста и пола
-    func fetchDOBandSex() throws -> (age: Int?, sex: Sex?) {
-        var calculatedAge: Int?
-        var userSex: Sex?
-
-        // Дата рождения
-        if let components = try? healthStore.dateOfBirthComponents(),
-           let birthDate = Calendar.current.date(from: components) {
-            let now = Date()
-            let ageComponents = Calendar.current.dateComponents([.year], from: birthDate, to: now)
-            calculatedAge = ageComponents.year
-        }
-
-        // Пол
-        if let bio = try? healthStore.biologicalSex() {
-            switch bio.biologicalSex {
-            case .male:   userSex = .male
-            case .female: userSex = .female
-            default: break
-            }
-        }
-
-        return (calculatedAge, userSex)
-    }
-
     func fetchSex() throws -> Sex? {
         var userSex: Sex?
         
