@@ -230,11 +230,10 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         var points: [DayEnergyPoint] = []
         var day = Calendar.current.startOfDay(for: interval.start)
         let end = interval.end
-        while day <= end {
+        for day in interval.daysSequence() {
             let aVal = try await active[day] ?? 0
             let bVal = try await basal[day] ?? 0
             points.append(DayEnergyPoint(date: day, activeKcal: aVal, basalKcal: bVal))
-            day = Calendar.current.date(byAdding: .day, value: 1, to: day)!
         }
         return points
     }
