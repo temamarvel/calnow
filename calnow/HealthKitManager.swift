@@ -14,12 +14,12 @@ enum EnergyAverageWindow {
     case last7Days
     case last30Days
     case last180Days
-
+    
     var days: Int {
         switch self {
-        case .last7Days:   return 7
-        case .last30Days:  return 30
-        case .last180Days: return 180
+            case .last7Days:   return 7
+            case .last30Days:  return 30
+            case .last180Days: return 180
         }
     }
 }
@@ -29,10 +29,10 @@ enum EnergyAverageWindow {
 /// Используется в OnboardingViewModel для запроса доступа и импорта роста, веса, возраста и пола.
 final class HealthKitManager: ObservableObject, HealthKitServicing {
     // MARK: - Private properties
-
+    
     private let healthStore = HKHealthStore()
     private(set) var isAuthorized: Bool = false
-
+    
     // MARK: - Запрашиваемые типы данных
     private var readTypes: Set<HKObjectType> {
         var set = Set<HKObjectType>()
@@ -66,7 +66,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
             await MainActor.run { self.isAuthorized = false }
             return
         }
-
+        
         do {
             try await healthStore.requestAuthorization(toShare: [], read: readTypes)
         } catch {
@@ -76,7 +76,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
             print("HealthKit authorization failed: \(error.localizedDescription)")
         }
     }
-
+    
     // MARK: - Получение последнего веса (в кг)
     func fetchLatestWeight() async throws -> Double? {
         guard let type = HKQuantityType.quantityType(forIdentifier: .bodyMass) else { return nil }
@@ -95,7 +95,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         guard let sample = results.first as? HKQuantitySample else { return nil }
         return sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
     }
-
+    
     // MARK: - Получение последнего роста (в см)
     func fetchLatestHeight() async throws -> Double? {
         guard let type = HKQuantityType.quantityType(forIdentifier: .height) else { return nil }
@@ -115,7 +115,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         let meters = sample.quantity.doubleValue(for: .meter())
         return meters * 100.0
     }
-
+    
     func fetchSex() throws -> Sex? {
         var userSex: Sex?
         
@@ -164,7 +164,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     }
     // MARK: - Внутренняя утилита
     
-
+    
     
     private func sumEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double {
         guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return 0 }
@@ -239,147 +239,144 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         return points
     }
     
-
-
-    
-        func fetchAverageDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
-            let cal = Calendar.current
-
-            let endDay = cal.startOfDay(for: Date())
-            guard let startDay = cal.date(byAdding: .day,
-                                          value: -window.days + 1,
-                                          to: endDay) else {
-                return 0
-            }
-
-            let interval = DateInterval(start: startDay, end: endDay)
-
-            // Типы
-            guard let activeType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
-                  let basalType  = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned) else {
-                return 0
-            }
-
-            // ACTIVE
-            let activePredicate = HKSamplePredicate.quantitySample(
-                type: activeType,
-                predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
-            )
-
-            let activeDesc = HKStatisticsCollectionQueryDescriptor(
-                predicate: activePredicate,
-                options: .cumulativeSum,
-                anchorDate: cal.startOfDay(for: interval.start),
-                intervalComponents: DateComponents(day: 1)
-            )
-
-            let activeCollection = try await activeDesc.result(for: healthStore)
-
-            // BASAL
-            let basalPredicate = HKSamplePredicate.quantitySample(
-                type: basalType,
-                predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
-            )
-
-            let basalDesc = HKStatisticsCollectionQueryDescriptor(
-                predicate: basalPredicate,
-                options: .cumulativeSum,
-                anchorDate: cal.startOfDay(for: interval.start),
-                intervalComponents: DateComponents(day: 1)
-            )
-
-            let basalCollection = try await basalDesc.result(for: healthStore)
-
-            // Сборка дневных значений
-            var dayCount = 0
-            var totalKcal: Double = 0
-            let unit = HKUnit.kilocalorie()
-
-            for dayStart in interval.daysSequence() {
-                let activeStats = activeCollection.statistics(for: dayStart)
-                let basalStats  = basalCollection.statistics(for: dayStart)
-
-                let active = activeStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
-                let basal  = basalStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
-
-                let dayTotal = active + basal
-                if dayTotal > 0 {
-                    dayCount += 1
-                    totalKcal += dayTotal
-                }
-            }
-
-            guard dayCount > 0 else { return 0 }
-            return totalKcal / Double(dayCount)
-        }
-        
-    func fetchDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
+    func fetchAverageDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
         let cal = Calendar.current
-
+        
         let endDay = cal.startOfDay(for: Date())
         guard let startDay = cal.date(byAdding: .day,
                                       value: -window.days + 1,
                                       to: endDay) else {
             return 0
         }
-
+        
         let interval = DateInterval(start: startDay, end: endDay)
-
+        
         // Типы
         guard let activeType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
               let basalType  = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned) else {
             return 0
         }
-
+        
         // ACTIVE
         let activePredicate = HKSamplePredicate.quantitySample(
             type: activeType,
             predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
         )
-
+        
         let activeDesc = HKStatisticsCollectionQueryDescriptor(
             predicate: activePredicate,
             options: .cumulativeSum,
             anchorDate: cal.startOfDay(for: interval.start),
             intervalComponents: DateComponents(day: 1)
         )
-
+        
         let activeCollection = try await activeDesc.result(for: healthStore)
-
+        
         // BASAL
         let basalPredicate = HKSamplePredicate.quantitySample(
             type: basalType,
             predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
         )
-
+        
         let basalDesc = HKStatisticsCollectionQueryDescriptor(
             predicate: basalPredicate,
             options: .cumulativeSum,
             anchorDate: cal.startOfDay(for: interval.start),
             intervalComponents: DateComponents(day: 1)
         )
-
+        
         let basalCollection = try await basalDesc.result(for: healthStore)
-
+        
         // Сборка дневных значений
         var dayCount = 0
         var totalKcal: Double = 0
         let unit = HKUnit.kilocalorie()
-
-        for dayStart in interval.daysSequence() {
-            let activeStats = activeCollection.statistics(for: dayStart)
-            let basalStats  = basalCollection.statistics(for: dayStart)
-
+        
+        for day in interval.daysSequence() {
+            let activeStats = activeCollection.statistics(for: day)
+            let basalStats  = basalCollection.statistics(for: day)
+            
             let active = activeStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
             let basal  = basalStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
-
+            
             let dayTotal = active + basal
             if dayTotal > 0 {
                 dayCount += 1
                 totalKcal += dayTotal
             }
         }
-
+        
+        guard dayCount > 0 else { return 0 }
+        return totalKcal / Double(dayCount)
+    }
+    
+    func fetchDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
+        let cal = Calendar.current
+        
+        let endDay = cal.startOfDay(for: Date())
+        guard let startDay = cal.date(byAdding: .day,
+                                      value: -window.days + 1,
+                                      to: endDay) else {
+            return 0
+        }
+        
+        let interval = DateInterval(start: startDay, end: endDay)
+        
+        // Типы
+        guard let activeType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned),
+              let basalType  = HKQuantityType.quantityType(forIdentifier: .basalEnergyBurned) else {
+            return 0
+        }
+        
+        // ACTIVE
+        let activePredicate = HKSamplePredicate.quantitySample(
+            type: activeType,
+            predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
+        )
+        
+        let activeDesc = HKStatisticsCollectionQueryDescriptor(
+            predicate: activePredicate,
+            options: .cumulativeSum,
+            anchorDate: cal.startOfDay(for: interval.start),
+            intervalComponents: DateComponents(day: 1)
+        )
+        
+        let activeCollection = try await activeDesc.result(for: healthStore)
+        
+        // BASAL
+        let basalPredicate = HKSamplePredicate.quantitySample(
+            type: basalType,
+            predicate: HKQuery.predicateForSamples(withStart: interval.start, end: interval.end)
+        )
+        
+        let basalDesc = HKStatisticsCollectionQueryDescriptor(
+            predicate: basalPredicate,
+            options: .cumulativeSum,
+            anchorDate: cal.startOfDay(for: interval.start),
+            intervalComponents: DateComponents(day: 1)
+        )
+        
+        let basalCollection = try await basalDesc.result(for: healthStore)
+        
+        // Сборка дневных значений
+        var dayCount = 0
+        var totalKcal: Double = 0
+        let unit = HKUnit.kilocalorie()
+        
+        for dayStart in interval.daysSequence() {
+            let activeStats = activeCollection.statistics(for: dayStart)
+            let basalStats  = basalCollection.statistics(for: dayStart)
+            
+            let active = activeStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
+            let basal  = basalStats?.sumQuantity()?.doubleValue(for: unit) ?? 0
+            
+            let dayTotal = active + basal
+            if dayTotal > 0 {
+                dayCount += 1
+                totalKcal += dayTotal
+            }
+        }
+        
         guard dayCount > 0 else { return 0 }
         return totalKcal
     }
@@ -390,10 +387,10 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         let end = Date()
         let start = calendar.date(byAdding: .day, value: -period.days, to: calendar.startOfDay(for: end))!
         let interval = DateInterval(start: start, end: end)
-
+        
         // здесь можно использовать твой dailyBuckets(for: .basalEnergyBurned, in: interval)
         let buckets = try await dailyBuckets(for: .basalEnergyBurned, in: interval)
-
+        
         return buckets.map { (date, kcal) in
             EnergyPoint(date: date, kcal: kcal)
         }
@@ -405,10 +402,10 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
         let end = Date()
         let start = calendar.date(byAdding: .day, value: -period.days, to: calendar.startOfDay(for: end))!
         let interval = DateInterval(start: start, end: end)
-
+        
         // здесь можно использовать твой dailyBuckets(for: .basalEnergyBurned, in: interval)
         let buckets = try await dailyBuckets(for: .activeEnergyBurned, in: interval)
-
+        
         return buckets.map { (date, kcal) in
             EnergyPoint(date: date, kcal: kcal)
         }
