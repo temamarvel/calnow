@@ -24,6 +24,40 @@ enum EnergyAverageWindow {
     }
 }
 
+enum PredefinedDateInterval {
+    case last7Days
+    case last30Days
+    case last180Days
+    
+    private func getDateInterval(for offsetDays: Int) -> DateInterval {
+//        let startDate = Calendar.current.startOfDay(for: Date())
+        let now = Date()
+        
+        // Дата offsetDays дней назад
+        guard let offsetDate = Calendar.current.date(byAdding: .day, value: -offsetDays, to: now) else {
+            // На всякий случай fallback: если что-то пошло не так — интервал из "сейчас" в "сейчас"
+            return DateInterval(start: now, end: now)
+        }
+        
+        // Начало суток того дня (00:00 локального календаря/таймзоны)
+        let startOfDay = Calendar.current.startOfDay(for: offsetDate)
+        
+        return DateInterval(start: startOfDay, end: now)
+    }
+    
+    var daysInterval: DateInterval {
+        return getDateInterval(for: self.daysCount)
+    }
+    
+    var daysCount: Int {
+        switch self {
+            case .last7Days:   return 7
+            case .last30Days:  return 30
+            case .last180Days: return 180
+        }
+    }
+}
+
 
 /// Реализация протокола HealthKitServicing.
 /// Используется в OnboardingViewModel для запроса доступа и импорта роста, веса, возраста и пола.
@@ -236,6 +270,13 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
             points.append(DayEnergyPoint(date: day, activeKcal: aVal, basalKcal: bVal))
         }
         return points
+    }
+    
+    
+    func fetchAverageDailyEnergy(interval: PredefinedDateInterval) async throws -> Double {
+        let activeSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
+        let basalSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
+        return (activeSum + basalSum) / Double(interval.daysCount)
     }
     
     func fetchAverageDailyEnergy(window: EnergyAverageWindow) async throws -> Double {
