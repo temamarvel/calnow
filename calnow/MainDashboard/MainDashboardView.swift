@@ -52,9 +52,10 @@ struct MainDashboardView: View {
     
     // Факт: возьми это из HealthKitManager, когда будет готово
     @State private var actualTotal: Double? = 1900
-    @State private var averageTotal: Double? = 0
-    @State private var averageTotal2: Double? = 0
+    @State private var average30Total: Double? = 0
     @State private var weekTotal: Double? = 0
+    
+    private let period = PredefinedDateInterval.last30Days
     
     private func loadActualTotal() async {
         do {
@@ -62,12 +63,9 @@ struct MainDashboardView: View {
             let active = try await healthKitService.fetchEnergyToday(for: .activeEnergyBurned)
             actualTotal = basal + active
             
-            let basalSums = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: PredefinedDateInterval.last7Days.daysInterval).values.reduce(0, +)
-            let activeSums = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: PredefinedDateInterval.last7Days.daysInterval).values.reduce(0, +)
-            averageTotal = (basalSums + activeSums)/Double(PredefinedDateInterval.last7Days.daysCount)
-//            averageTotal = try await healthKitService.fetchEnergyDailySums(for: HKQuantityTypeIdentifier, in: <#T##DateInterval#>)(interval: .last30Days)
-//            //averageTotal2 = try await healthKitService.fetchAverageDailyEnergy(interval: .last7Days)
-//            weekTotal = try await healthKitService.fetchDailyEnergySum(interval: .last7Days)
+            let basalSums = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: period.daysInterval).values.reduce(0, +)
+            let activeSums = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: period.daysInterval).values.reduce(0, +)
+            average30Total = (basalSums + activeSums)/Double(period.daysCount)
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -108,9 +106,7 @@ struct MainDashboardView: View {
                             VStack{
                                 DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
                                 
-                                DetailCardView(value: "\(Int(averageTotal ?? 0))", description: "Среднее за месяц")
-                                
-                                DetailCardView(value: "\(Int(averageTotal2 ?? 0))", description: "Среднее за 7 дней")
+                                DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за месяц")
                                 
                                 DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Сумма за 7 дней")
                                 
@@ -120,9 +116,8 @@ struct MainDashboardView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 52, style: .continuous)
                                 .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
-                        ).shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
-                        
-                        //Spacer()
+                        )
+                        .shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
                     }
                     .padding()
                     .navigationTitle("Сегодня")
