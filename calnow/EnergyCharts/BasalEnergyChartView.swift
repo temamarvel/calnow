@@ -1,5 +1,6 @@
 import SwiftUI
 import Charts
+internal import HealthKit
 
 struct EnergyPoint: Identifiable {
     let id = UUID()
@@ -7,33 +8,33 @@ struct EnergyPoint: Identifiable {
     let kcal: Double
 }
 
-enum BasalChartPeriod: String, CaseIterable, Identifiable {
-    case week
-    case month
-    case halfYear
-    case year
-    
-    var id: Self { self }
-    
-    var title: String {
-        switch self {
-            case .week:     return "Неделя"
-            case .month:    return "Месяц"
-            case .halfYear: return "6 мес"
-            case .year:     return "Год"
-        }
-    }
-    
-    /// Сколько дней показываем на графике
-    var days: Int {
-        switch self {
-            case .week:     return 7
-            case .month:    return 30
-            case .halfYear: return 180
-            case .year:     return 365
-        }
-    }
-}
+//enum BasalChartPeriod: String, CaseIterable, Identifiable {
+//    case week
+//    case month
+//    case halfYear
+//    case year
+//    
+//    var id: Self { self }
+//    
+//    var title: String {
+//        switch self {
+//            case .week:     return "Неделя"
+//            case .month:    return "Месяц"
+//            case .halfYear: return "6 мес"
+//            case .year:     return "Год"
+//        }
+//    }
+//    
+//    /// Сколько дней показываем на графике
+//    var days: Int {
+//        switch self {
+//            case .week:     return 7
+//            case .month:    return 30
+//            case .halfYear: return 180
+//            case .year:     return 365
+//        }
+//    }
+//}
 
 struct DailyEnergyChartView: View {
     let basalPoints: [EnergyPoint]
@@ -277,7 +278,7 @@ struct EnergyChartView: View {
 }
 
 struct BasalEnergyChartView: View {
-    @State private var period: BasalChartPeriod = .week
+    @State private var period: PredefinedDateInterval = .last7Days
     @State private var basalPoints: [EnergyPoint] = []
     @State private var activePoints: [EnergyPoint] = []
     
@@ -287,8 +288,13 @@ struct BasalEnergyChartView: View {
     
     private func loadData() async {
         do {
-            basalPoints = try await healthKitManager.basalEnergyPoints(for: period)
-            activePoints = try await healthKitManager.activeEnergyPoints(for: period)
+            let basalDict = try await healthKitManager.dailyBuckets(for: .basalEnergyBurned, in: period.daysInterval)
+            
+                  basalPoints = basalDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
+            let activeDict = try await healthKitManager.dailyBuckets(for: .activeEnergyBurned, in: period.daysInterval)
+            
+            activePoints = activeDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
+            
         } catch {
             print("Ошибка загрузки: \(error)")
         }
@@ -346,7 +352,7 @@ struct BasalEnergyChartView: View {
             }
             
             Picker("Период", selection: $period) {
-                ForEach(BasalChartPeriod.allCases) { range in
+                ForEach(PredefinedDateInterval.allCases) { range in
                     Text(range.title).tag(range)
                 }
             }

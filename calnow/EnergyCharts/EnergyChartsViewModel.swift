@@ -37,8 +37,8 @@ final class EnergyChartsViewModel: ObservableObject {
             do {
                 let interval = period.interval()
                 // Требуются методы протокола для дневных сумм
-                let points = try await health.dailyEnergyPoints(in: interval)
-                self.series = points
+                //let points = try await health.dailyEnergyPoints(in: interval)
+                //self.series = nil
             } catch {
                 alertMessage = "Не удалось загрузить данные: \(error.localizedDescription)"
             }
