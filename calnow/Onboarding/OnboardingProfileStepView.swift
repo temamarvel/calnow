@@ -8,10 +8,11 @@
 
 import SwiftData
 import SwiftUI
+import HealthKitDataService
 
 struct OnboardingProfileStepView: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var healthKitManager : HealthKitManager
+    @EnvironmentObject private var healthKitManager : HealthKitDataService
     @Query private var profiles: [UserProfile]
 
     enum ProfileField: Hashable, CaseIterable {
@@ -142,7 +143,9 @@ struct OnboardingProfileStepView: View {
             height = try await healthKitManager.fetchLatestHeight() ?? 0.0
             weight = try await healthKitManager.fetchLatestWeight() ?? 0.0
             age = try await healthKitManager.fetchAge() ?? 0
-            sex = try await healthKitManager.fetchSex() ?? .male
+            //TODO: do it OK
+            //sex = try await healthKitManager.fetchSex() ?? .male
+            sex = .male
         }
     }
 

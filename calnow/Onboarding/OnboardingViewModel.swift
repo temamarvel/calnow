@@ -10,6 +10,7 @@ import SwiftUI
 import SwiftData
 internal import Combine
 internal import HealthKit
+import HealthKitDataService
 
 /// Вью-модель онбординга: собирает профиль, подтягивает HealthKit, сохраняет единственную запись в SwiftData.
 @MainActor
@@ -37,7 +38,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var alertMessage: String?             // для ошибок/алертов
 
     // MARK: - Зависимость
-    var health: HealthKitServicing
+    var health: HealthDataService
 
     // MARK: - Форматирование чисел с учётом локали
     private let nf: NumberFormatter = {
@@ -50,7 +51,7 @@ final class OnboardingViewModel: ObservableObject {
     }()
 
     // MARK: - Инициализация
-    init(health: HealthKitServicing) {
+    init(health: HealthDataService) {
         self.health = health
     }
 
@@ -133,8 +134,8 @@ final class OnboardingViewModel: ObservableObject {
 
     private func healthRequest() async {
         do {
-            await health.requestAuthorization()
-            hkAuthorized = health.isAuthorized
+            let result = try await health.requestAuthorization()
+            hkAuthorized = result.isAuthorized
             if !hkAuthorized {
                 alertMessage = "Доступ к Здоровью не предоставлен."
             }
@@ -145,7 +146,7 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     private func importFromHealth() async {
-        guard health.isAuthorized else {
+        guard hkAuthorized else {
             alertMessage = "Нет доступа к Здоровью. Разрешите доступ, чтобы импортировать данные."
             return
         }

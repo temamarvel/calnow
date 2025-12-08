@@ -1,4 +1,5 @@
 import SwiftUI
+import HealthKitDataService
 import SwiftData
 
 struct RootView: View {
@@ -31,13 +32,13 @@ struct RootView: View {
 
 @main
 struct CalNowApp: App {
-    @StateObject private var healthKitManageer = HealthKitManager()
+    @StateObject private var healthKitService = HealthKitDataService()
     
     var body: some Scene {
         WindowGroup {
             RootView()
         }
         .modelContainer(for: UserProfile.self)
-        .environmentObject(healthKitManageer)
+        .environmentObject(healthKitService)
     }
 }

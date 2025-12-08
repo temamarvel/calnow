@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3B91CCF72EE70CB9009BA225 /* HealthKitDataService in Frameworks */ = {isa = PBXBuildFile; productRef = 3B91CCF62EE70CB9009BA225 /* HealthKitDataService */; };
 		3B9FDC372ED09BDE0077FB7B /* CircleProgressBar in Frameworks */ = {isa = PBXBuildFile; productRef = 3B9FDC362ED09BDE0077FB7B /* CircleProgressBar */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B9FDC372ED09BDE0077FB7B /* CircleProgressBar in Frameworks */,
+				3B91CCF72EE70CB9009BA225 /* HealthKitDataService in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +86,7 @@
 			name = calnow;
 			packageProductDependencies = (
 				3B9FDC362ED09BDE0077FB7B /* CircleProgressBar */,
+				3B91CCF62EE70CB9009BA225 /* HealthKitDataService */,
 			);
 			productName = calnow;
 			productReference = 3B29FB482EB8D45300803E22 /* calnow.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3B9FDC352ED09BDE0077FB7B /* XCRemoteSwiftPackageReference "CircleProgressBar" */,
+				3B91CCF52EE70CB9009BA225 /* XCRemoteSwiftPackageReference "HealthKitDataService" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3B29FB492EB8D45300803E22 /* Products */;
@@ -380,6 +384,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3B91CCF52EE70CB9009BA225 /* XCRemoteSwiftPackageReference "HealthKitDataService" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/temamarvel/HealthKitDataService.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		3B9FDC352ED09BDE0077FB7B /* XCRemoteSwiftPackageReference "CircleProgressBar" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/temamarvel/CircleProgressBar.git";
@@ -391,6 +403,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3B91CCF62EE70CB9009BA225 /* HealthKitDataService */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B91CCF52EE70CB9009BA225 /* XCRemoteSwiftPackageReference "HealthKitDataService" */;
+			productName = HealthKitDataService;
+		};
 		3B9FDC362ED09BDE0077FB7B /* CircleProgressBar */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3B9FDC352ED09BDE0077FB7B /* XCRemoteSwiftPackageReference "CircleProgressBar" */;

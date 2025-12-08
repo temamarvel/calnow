@@ -7,9 +7,10 @@
 
 import SwiftUI
 import SwiftData
+import HealthKitDataService
 
 struct OnboardingHealthPermissionsStepView: View {
-    @EnvironmentObject private var healthKit: HealthKitManager
+    @EnvironmentObject private var healthKit: HealthKitDataService
 
     @State private var isRequestInProgress = false
     @State private var errorMessage: String?
@@ -59,7 +60,7 @@ struct OnboardingHealthPermissionsStepView: View {
         defer { isRequestInProgress = false }
 
         do {
-            await healthKit.requestAuthorization()
+            let result = try await healthKit.requestAuthorization()
             onCompleted()
         } catch {
             errorMessage = "Не удалось запросить доступ. Попробуйте ещё раз. (\(error.localizedDescription))"

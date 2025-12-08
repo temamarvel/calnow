@@ -8,12 +8,13 @@
 
 import SwiftUI
 import SwiftData
+import HealthKitDataService
 
 enum DashboardTab { case current, charts }
 
 
 struct DashboardRootContainer: View {
-    @EnvironmentObject private var hk : HealthKitManager
+    @EnvironmentObject private var hk : HealthKitDataService
     var body: some View {
         DashboardRootView(health: hk) // ← передаём зависимость
     }
@@ -23,7 +24,7 @@ struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var tab: DashboardTab = .current
     
-    init(health: HealthKitServicing) { }
+    init(health: HealthDataService) { }
 
     var body: some View {
         NavigationStack {

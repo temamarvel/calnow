@@ -1,5 +1,5 @@
 {
-  "originHash" : "2dcbe1b45d60e22749466f3db2a620972f65a86bc34d8f87c792f989d8e2c4bd",
+  "originHash" : "1bcbb03626634430b4dd263d42fe950e85f10f3d0b31d1a48b5b081490ab5f7b",
   "pins" : [
     {
       "identity" : "circleprogressbar",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "46dcbc282246ffc148895be0e143b028c88b74a6"
+      }
+    },
+    {
+      "identity" : "healthkitdataservice",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/temamarvel/HealthKitDataService.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "71ca229f7352b65ddbc5abbfc49647efdc1ee0c1"
       }
     }
   ],
