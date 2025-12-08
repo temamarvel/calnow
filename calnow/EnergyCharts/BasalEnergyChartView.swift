@@ -8,34 +8,6 @@ struct EnergyPoint: Identifiable {
     let kcal: Double
 }
 
-//enum BasalChartPeriod: String, CaseIterable, Identifiable {
-//    case week
-//    case month
-//    case halfYear
-//    case year
-//    
-//    var id: Self { self }
-//    
-//    var title: String {
-//        switch self {
-//            case .week:     return "Неделя"
-//            case .month:    return "Месяц"
-//            case .halfYear: return "6 мес"
-//            case .year:     return "Год"
-//        }
-//    }
-//    
-//    /// Сколько дней показываем на графике
-//    var days: Int {
-//        switch self {
-//            case .week:     return 7
-//            case .month:    return 30
-//            case .halfYear: return 180
-//            case .year:     return 365
-//        }
-//    }
-//}
-
 struct DailyEnergyChartView: View {
     let basalPoints: [EnergyPoint]
     let activePoints: [EnergyPoint]
