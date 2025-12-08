@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftData
 internal import Combine
+import HealthKit
 
 /// Вью-модель онбординга: собирает профиль, подтягивает HealthKit, сохраняет единственную запись в SwiftData.
 @MainActor
@@ -228,8 +229,14 @@ protocol HealthKitServicing: AnyObject {
     func fetchLatestHeight() async throws -> Double?     // см
     func fetchSex() throws -> Sex?
     func fetchAge() throws -> Int?
-    func fetchActiveEnergyToday() async throws -> Double
-    func fetchBasalEnergyToday() async throws -> Double
-    //func dailyEnergyPoints(in interval: DateInterval) async throws -> [DayEnergyPoint]
-    func fetchAverageDailyEnergy(interval: PredefinedDateInterval) async throws -> Double
+    
+    //func fetchActiveEnergyToday() async throws -> Double
+    func fetchEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double
+    func fetchEnergyDailyBuckets(for id: HKQuantityTypeIdentifier, in interval: DateInterval) async throws -> [Date : Double]
+//    fetchTotalEnergyToday
+    //func fetchTotalEnergyToday() async throws -> Double
+    
+    
+    //func fetchAverageEnergy(for interval: PredefinedDateInterval) async throws -> Double
+    //func fetchTotalEnergy(for interval: PredefinedDateInterval) async throws -> Double
 }

@@ -178,26 +178,30 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     
     
     /// Сумма активной энергии за календарные сутки «сегодня» в ккал.
-    func fetchActiveEnergyToday() async throws -> Double {
-        try await sumEnergyToday(for: .activeEnergyBurned)
-    }
+//    func fetchActiveEnergyToday() async throws -> Double {
+//        try await sumEnergyToday(for: .activeEnergyBurned)
+//    }
     
-    /// Сумма базальной энергии за календарные сутки «сегодня» в ккал.
-    func fetchBasalEnergyToday() async throws -> Double {
-        try await sumEnergyToday(for: .basalEnergyBurned)
-    }
+//    func fetchEnergyToday() async throws -> Double {
+//        try await sumEnergyToday(for: .activeEnergyBurned)
+//    }
+//    
+//    /// Сумма базальной энергии за календарные сутки «сегодня» в ккал.
+//    func fetchBasalEnergyToday() async throws -> Double {
+//        try await sumEnergyToday(for: .basalEnergyBurned)
+//    }
     
     
     func fetchTotalEnergyToday() async throws -> Double {
-        async let basal = fetchBasalEnergyToday()
-        async let active = fetchActiveEnergyToday()
+        async let basal = fetchEnergyToday(for: .basalEnergyBurned)
+        async let active = fetchEnergyToday(for: .activeEnergyBurned)
         return try await basal + active
     }
     // MARK: - Внутренняя утилита
     
     
     
-    private func sumEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double {
+    func fetchEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double {
         guard let type = HKQuantityType.quantityType(forIdentifier: id) else { return 0 }
         
         // границы сегодняшнего дня по локальному календарю/таймзоне
@@ -220,7 +224,7 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     }
     
     // helper: собрать дневную коллекцию по типу
-    func dailyBuckets(
+    func fetchEnergyDailyBuckets(
         for id: HKQuantityTypeIdentifier,
         in interval: DateInterval
     ) async throws -> [Date : Double] {
@@ -254,11 +258,11 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     }
     
     func fetchAverageDailyEnergy(interval: PredefinedDateInterval) async throws -> Double {
-        let totalEnergy = try await fetchDailyEnergy(interval: interval)
+        let totalEnergy = try await fetchDailyEnergySum(interval: interval)
         return totalEnergy / Double(interval.daysCount)
     }
 
-    func fetchDailyEnergy(interval: PredefinedDateInterval) async throws -> Double {
+    func fetchDailyEnergySum(interval: PredefinedDateInterval) async throws -> Double {
         let activeSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
         let basalSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
         return (activeSum + basalSum)
