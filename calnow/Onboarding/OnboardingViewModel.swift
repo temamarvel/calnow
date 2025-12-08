@@ -232,7 +232,7 @@ protocol HealthKitServicing: AnyObject {
     
     //func fetchActiveEnergyToday() async throws -> Double
     func fetchEnergyToday(for id: HKQuantityTypeIdentifier) async throws -> Double
-    func fetchEnergyDailyBuckets(for id: HKQuantityTypeIdentifier, in interval: DateInterval) async throws -> [Date : Double]
+    func fetchEnergyDailySums(for id: HKQuantityTypeIdentifier, in interval: DateInterval) async throws -> [Date : Double]
 //    fetchTotalEnergyToday
     //func fetchTotalEnergyToday() async throws -> Double
     

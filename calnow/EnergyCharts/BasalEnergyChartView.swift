@@ -260,10 +260,10 @@ struct BasalEnergyChartView: View {
     
     private func loadData() async {
         do {
-            let basalDict = try await healthKitManager.fetchEnergyDailyBuckets(for: .basalEnergyBurned, in: period.daysInterval)
+            let basalDict = try await healthKitManager.fetchEnergyDailySums(for: .basalEnergyBurned, in: period.daysInterval)
             
                   basalPoints = basalDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
-            let activeDict = try await healthKitManager.fetchEnergyDailyBuckets(for: .activeEnergyBurned, in: period.daysInterval)
+            let activeDict = try await healthKitManager.fetchEnergyDailySums(for: .activeEnergyBurned, in: period.daysInterval)
             
             activePoints = activeDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
             
