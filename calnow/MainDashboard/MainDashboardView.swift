@@ -37,7 +37,7 @@ struct MainDashboardView: View {
     }
     
     private var tdee: Double {
-        profile?.tdee ?? 2500  // имя свойства подставь своё
+        profile?.tdee ?? 2900  // имя свойства подставь своё
     }
     
     // План: считаем, что план = tdee
@@ -57,15 +57,32 @@ struct MainDashboardView: View {
     
     private let period = PredefinedDateInterval.last30Days
     
+    private func getCurrentWeekInterval(calendar: Calendar = .current) -> DateInterval {
+        let now = Date()
+        
+        // Интервал всей недели, в которую попадает "сейчас"
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now) else {
+            return DateInterval(start: now, end: now)
+        }
+        
+        // Нам нужно: с начала недели до текущего момента
+        return DateInterval(start: weekInterval.start, end: now)
+    }
+    
     private func loadActualTotal() async {
         do {
             let basal = try await healthKitService.fetchEnergyToday(for: .basalEnergyBurned)
             let active = try await healthKitService.fetchEnergyToday(for: .activeEnergyBurned)
             actualTotal = basal + active
             
-            let basalSums = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: period.daysInterval).values.reduce(0, +)
-            let activeSums = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: period.daysInterval).values.reduce(0, +)
-            average30Total = (basalSums + activeSums)/Double(period.daysCount)
+            let basalSum = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: period.daysInterval).values.reduce(0, +)
+            let activeSum = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: period.daysInterval).values.reduce(0, +)
+            average30Total = (basalSum + activeSum)/Double(period.daysCount)
+            
+            let currentWeekInterval = getCurrentWeekInterval()
+            let weekBasalSum = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: currentWeekInterval).values.reduce(0, +)
+            let weekActiveSum = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: currentWeekInterval).values.reduce(0, +)
+            weekTotal = weekBasalSum + weekActiveSum
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
             // Можно оставить actualTotal как nil, тогда вью возьмёт 1900
@@ -95,20 +112,20 @@ struct MainDashboardView: View {
                                 CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
                                                    enableGlow: true)
                                 VStack{
+                                    Text("Осталось")
                                     Text("\(remainingTotal)")
                                         .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
                                         .fontWeight(.bold)
-                                        .foregroundStyle(.secondary)
-                                }
+                                }.foregroundStyle(.secondary)
                                 
                             }
                             
                             VStack{
                                 DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
                                 
-                                DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за месяц")
+                                DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за 30 дней")
                                 
-                                DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Сумма за 7 дней")
+                                DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Потрачено с начала недели")
                                 
                             }
                         }
@@ -156,7 +173,7 @@ struct MainDashboardView: View {
 
 struct MainDashboardPreviewWrapper: View {
     let container: ModelContainer
-    @StateObject private var healthManager = HealthKitDataService()
+    @StateObject private var healthService = HealthKitDataService()
     
     init() {
         // in-memory контейнер
@@ -175,7 +192,7 @@ struct MainDashboardPreviewWrapper: View {
     var body: some View {
         MainDashboardView()
             .modelContainer(container)
-            .environmentObject(healthManager)
+            .environmentObject(healthService)
     }
 }
 
