@@ -9,7 +9,7 @@
 import SwiftUI
 import SwiftData
 internal import Combine
-import HealthKit
+internal import HealthKit
 
 /// Вью-модель онбординга: собирает профиль, подтягивает HealthKit, сохраняет единственную запись в SwiftData.
 @MainActor

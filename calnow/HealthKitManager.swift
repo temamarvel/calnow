@@ -263,8 +263,8 @@ final class HealthKitManager: ObservableObject, HealthKitServicing {
     }
 
     func fetchDailyEnergySum(interval: PredefinedDateInterval) async throws -> Double {
-        let activeSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
-        let basalSum = try await dailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
+        let activeSum = try await fetchEnergyDailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
+        let basalSum = try await fetchEnergyDailyBuckets(for: .activeEnergyBurned, in: interval.daysInterval).values.reduce(0, +)
         return (activeSum + basalSum)
     }
 
