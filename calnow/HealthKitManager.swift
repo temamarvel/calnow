@@ -10,20 +10,6 @@ import Foundation
 internal import HealthKit
 internal import Combine
 
-enum EnergyAverageWindow {
-    case last7Days
-    case last30Days
-    case last180Days
-    
-    var days: Int {
-        switch self {
-            case .last7Days:   return 7
-            case .last30Days:  return 30
-            case .last180Days: return 180
-        }
-    }
-}
-
 enum PredefinedDateInterval: String, CaseIterable, Identifiable {
     case last7Days
     case last30Days
