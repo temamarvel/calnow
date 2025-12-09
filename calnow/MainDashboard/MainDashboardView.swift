@@ -115,7 +115,7 @@ struct MainDashboardView: View {
                                 VStack{
                                     Text("Осталось")
                                     Text("\(remainingTotal)")
-                                        .font(.scaledSize(multiplier: 2, relativeTo: .largeTitle))
+                                        .font(.largeTitle.scaled(multiplier: 2.0))
                                         .fontWeight(.bold)
                                 }.foregroundStyle(.secondary)
                                 
