@@ -357,3 +357,8 @@ struct BasalEnergyChartView: View {
         }
     }
 }
+
+#Preview("Chart") {
+    BasalEnergyChartView()
+        .environment(\.healthDataService, MockHealthDataService())
+}
