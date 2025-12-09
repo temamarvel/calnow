@@ -257,7 +257,7 @@ struct BasalEnergyChartView: View {
     
     @State private var showDailyChart: Bool = false
     
-    @EnvironmentObject private var healthKitService: HealthKitDataService
+    @Environment(\.healthDataService) private var healthKitService
     
     private func loadData() async {
         do {

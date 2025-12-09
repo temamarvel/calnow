@@ -14,9 +14,9 @@ enum DashboardTab { case current, charts }
 
 
 struct DashboardRootContainer: View {
-    @EnvironmentObject private var hk : HealthKitDataService
+    @Environment(\.healthDataService) private var healthKitService
     var body: some View {
-        DashboardRootView(health: hk) // ← передаём зависимость
+        DashboardRootView(health: healthKitService) // ← передаём зависимость
     }
 }
 

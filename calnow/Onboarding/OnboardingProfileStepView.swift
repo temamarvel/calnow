@@ -12,7 +12,7 @@ import HealthKitDataService
 
 struct OnboardingProfileStepView: View {
     @Environment(\.modelContext) private var context
-    @EnvironmentObject private var healthKitManager : HealthKitDataService
+    @Environment(\.healthDataService) private var healthKitService
     @Query private var profiles: [UserProfile]
 
     enum ProfileField: Hashable, CaseIterable {
@@ -140,9 +140,9 @@ struct OnboardingProfileStepView: View {
     
     private func importProfileFromHealthKit(){
         Task{
-            height = try await healthKitManager.fetchLatestHeight() ?? 0.0
-            weight = try await healthKitManager.fetchLatestWeight() ?? 0.0
-            age = try await healthKitManager.fetchAge() ?? 0
+            height = try await healthKitService.fetchLatestHeight() ?? 0.0
+            weight = try await healthKitService.fetchLatestWeight() ?? 0.0
+            age = try await healthKitService.fetchAge() ?? 0
             //TODO: do it OK
             //sex = try await healthKitManager.fetchSex() ?? .male
             sex = .male

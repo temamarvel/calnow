@@ -25,7 +25,7 @@ struct DetailCardView: View {
 // MARK: - MainDashboardView (использует секции)
 struct MainDashboardView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var healthKitService: HealthKitDataService
+    @Environment(\.healthDataService) private var healthKitService
     @Query private var profiles: [UserProfile]
     
     // Для простоты берём первый профиль

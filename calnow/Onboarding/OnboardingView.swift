@@ -3,16 +3,15 @@ import HealthKitDataService
 import SwiftData
 
 struct OnboardingContainer: View {
-    @EnvironmentObject private var hk : HealthKitDataService
+    @Environment(\.healthDataService) private var healthKitService
     var body: some View {
-        OnboardingView(health: hk) // ← передаём зависимость
+        OnboardingView(health: healthKitService) // ← передаём зависимость
     }
 }
 
 struct OnboardingView: View {
     // SwiftData
     @Environment(\.modelContext) private var modelContext
-    //@EnvironmentObject var healthKitManager: HealthKitManager
     
     init(health: HealthDataService) {
         //_vm = StateObject(wrappedValue: OnboardingViewModel(health: health))

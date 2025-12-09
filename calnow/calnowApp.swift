@@ -30,6 +30,20 @@ struct RootView: View {
     }
 }
 
+private struct HealthDataServiceKey: EnvironmentKey {
+    // Значение по умолчанию – можно поставить простую заглушку,
+    // чтобы превью не падали, если забудешь передать сервис.
+    static var defaultValue: any HealthDataService = MockHealthDataService()
+}
+
+extension EnvironmentValues {
+    var healthDataService: any HealthDataService {
+        get { self[HealthDataServiceKey.self] }
+        set { self[HealthDataServiceKey.self] = newValue }
+    }
+}
+
+
 @main
 struct CalNowApp: App {
     @StateObject private var healthKitService = HealthKitDataService()
@@ -39,6 +53,6 @@ struct CalNowApp: App {
             RootView()
         }
         .modelContainer(for: UserProfile.self)
-        .environmentObject(healthKitService)
+        .environment(\.healthDataService, healthKitService)
     }
 }
