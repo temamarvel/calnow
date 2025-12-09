@@ -54,7 +54,7 @@ struct DailyEnergyChartView: View {
                 // Итоговый
                 ForEach(totalPoints) { point in
                     BarMark(
-                        x: .value("Дата", point.date),
+                        x: .value("Дата", point.date, unit: .day),
                         y: .value("Ккал/день", point.kcal)
                     )
                     .foregroundStyle(selectedPoint?.id == point.id ? .orange : .blue)
