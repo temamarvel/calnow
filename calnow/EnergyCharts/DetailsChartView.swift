@@ -8,12 +8,15 @@
 import SwiftUI
 import HealthKitDataService
 internal import HealthKit
+import Charts
 
 struct DetailsChartView: View {
     @State private var period: PredefinedDateInterval = .last7Days
     @State private var basalPoints: [EnergyPoint] = []
     @State private var activePoints: [EnergyPoint] = []
     @State private var totalPoints: [EnergyPoint] = []
+    
+    @State private var selectedPoint: EnergyPoint?
     
     @Environment(\.healthDataService) private var healthKitService
     
@@ -53,7 +56,52 @@ struct DetailsChartView: View {
             }
             .pickerStyle(.segmented)
     
-            //TODO: impl charts
+            Chart {
+                
+                
+                // Итоговый
+                ForEach(totalPoints) { point in
+                    BarMark(
+                        x: .value("Дата", point.date, unit: .day),
+                        y: .value("Ккал/день", point.kcal)
+                    )
+                    .foregroundStyle(selectedPoint?.id == point.id ? .orange : .blue)
+                    //.interpolationMethod(.catmullRom)
+                    
+                    //                    PointMark(
+                    //                        x: .value("Дата", point.date),
+                    //                        y: .value("Ккал/день", point.kcal)
+                    //                    )
+                    //                    .symbolSize(selectedPoint?.id == point.id ? 100 : 20)
+                }
+                //.foregroundStyle(by: .value("Серия", "Итоговый"))
+            }
+            .chartOverlay { proxy in
+                GeometryReader { geo in
+                    // Прозрачный слой, принимающий жесты
+                    Rectangle()
+                        .fill(.clear)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            SpatialTapGesture()
+                                .onEnded { value in
+                                    let location = value.location
+                                    
+                                    // Получаем значение X (дату) на том месте, где тапнули
+                                    if let date: Date = proxy.value(atX: location.x) {
+                                        // Находим ближайшую точку к этой дате
+                                        if let nearest = totalPoints.min(by: {
+                                            abs($0.date.timeIntervalSince(date)) <
+                                                abs($1.date.timeIntervalSince(date))
+                                        }) {
+                                            selectedPoint = nearest
+                                        }
+                                    }
+                                }
+                        )
+                }
+            }
+        
         }
         .padding()
         .task {
@@ -63,4 +111,9 @@ struct DetailsChartView: View {
             Task { await loadData() }
         }
     }
+}
+
+#Preview("Chart") {
+    DetailsChartView()
+        .environment(\.healthDataService, MockHealthDataService())
 }

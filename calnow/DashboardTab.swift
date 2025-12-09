@@ -33,7 +33,7 @@ struct DashboardRootView: View {
                 case .current:
                     MainDashboardView()
                 case .charts:
-                    BasalEnergyChartView()
+                    DetailsChartView()
                 }
             }
             .toolbar {
