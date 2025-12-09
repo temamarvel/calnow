@@ -26,6 +26,7 @@ struct DetailCardView: View {
 struct MainDashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.healthDataService) private var healthKitService
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var profiles: [UserProfile]
     
     // Для простоты берём первый профиль
@@ -135,6 +136,13 @@ struct MainDashboardView: View {
                                 .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
                         )
                         .shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
+                    }
+                    .onChange(of: scenePhase) { old, phase in
+                        if phase == .active {
+                            Task {
+                                await loadActualTotal()
+                            }
+                        }
                     }
                     .padding()
                     .navigationTitle("Сегодня")
