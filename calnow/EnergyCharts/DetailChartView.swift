@@ -11,7 +11,7 @@ import Charts
 
 struct DetailChartView: View {
     let points: [EnergyPoint]
-    let unit: Calendar.Component = .day
+    let unit: Calendar.Component
     @State private var selectedPoint: EnergyPoint?
     
     var body: some View {
@@ -19,7 +19,7 @@ struct DetailChartView: View {
             // Вертикальная линия для выбранного дня
             if let selectedPoint {
                 RuleMark(
-                    x: .value("Дата", selectedPoint.date, unit: .day)
+                    x: .value("Дата", selectedPoint.date, unit: unit)
                 )
                 .foregroundStyle(.secondary)
                 .lineStyle(StrokeStyle(lineWidth: 1))
@@ -34,7 +34,6 @@ struct DetailChartView: View {
                 .foregroundStyle(selectedPoint?.id == point.id ? .orange : .blue)
             }
         }
-        .chartPlotStyle { $0.padding(.top, 100) }
         .chartOverlay { proxy in
             GeometryReader { geo in
                 ZStack{
@@ -133,7 +132,7 @@ private let previewEnergyPoints: [EnergyPoint] = {
 }()
 
 #Preview("Detail") {
-        DetailChartView(points: previewEnergyPoints)
+    DetailChartView(points: previewEnergyPoints, unit: .day)
             .frame(height: 300)
             .padding()
 }

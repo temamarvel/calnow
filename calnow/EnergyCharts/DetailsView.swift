@@ -20,22 +20,30 @@ struct DetailsView: View {
     
     private func loadData() async {
         do {
-            let basalDict = try await healthKitService.fetchEnergyDailySums(for: .basalEnergyBurned, in: period.daysInterval)
+            let basalDict = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, unit: getChartUnit())
             basalPoints = basalDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
             
-            let activeDict = try await healthKitService.fetchEnergyDailySums(for: .activeEnergyBurned, in: period.daysInterval)
+            let activeDict = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, unit: getChartUnit())
             activePoints = activeDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
             
             let totalDict = basalDict.merging(activeDict) { basal, active in
                 basal + active
             }
-
+            
             totalPoints = totalDict
                 .map { EnergyPoint(date: $0.key, kcal: $0.value) }
                 .sorted { $0.date < $1.date }
             
         } catch {
             print("Ошибка загрузки: \(error)")
+        }
+    }
+    
+    private func getChartUnit() -> Calendar.Component {
+        switch period {
+            case .last7Days: return .day
+            case .last30Days: return .day
+            case .last180Days: return .month
         }
     }
     
@@ -53,8 +61,8 @@ struct DetailsView: View {
                 }
             }
             .pickerStyle(.segmented)
-    
-            DetailChartView(points: totalPoints)
+            
+            DetailChartView(points: totalPoints, unit: getChartUnit())
         }
         .padding()
         .task {
