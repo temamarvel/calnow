@@ -12,26 +12,26 @@ import Charts
 
 struct DetailsView: View {
     @State private var period: PredefinedDateInterval = .last7Days
-    @State private var basalPoints: [EnergyPoint] = []
-    @State private var activePoints: [EnergyPoint] = []
-    @State private var totalPoints: [EnergyPoint] = []
+    @State private var basalPoints: [any EnergyPoint] = []
+    @State private var activePoints: [any EnergyPoint] = []
+    @State private var totalPoints: [any EnergyPoint] = []
     
     @Environment(\.healthDataService) private var healthKitService
     
     private func loadData() async {
         do {
             let basalDict = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, unit: getChartUnit())
-            basalPoints = basalDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
+            basalPoints = basalDict.map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
             
             let activeDict = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, unit: getChartUnit())
-            activePoints = activeDict.map { EnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
+            activePoints = activeDict.map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
             
             let totalDict = basalDict.merging(activeDict) { basal, active in
                 basal + active
             }
             
             totalPoints = totalDict
-                .map { EnergyPoint(date: $0.key, kcal: $0.value) }
+                .map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }
                 .sorted { $0.date < $1.date }
             
         } catch {
