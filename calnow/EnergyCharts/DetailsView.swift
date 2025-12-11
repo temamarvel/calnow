@@ -18,21 +18,65 @@ struct DetailsView: View {
     
     @Environment(\.healthDataService) private var healthKitService
     
+    
+    private func loadData(unit: Calendar.Component,makePoint: (Date, Double) -> any EnergyPoint
+    ) async throws {
+        let basalDict = try await healthKitService.fetchEnergySums(
+            for: .basalEnergyBurned,
+            in: period.daysInterval,
+            unit: unit
+        )
+        
+        let activeDict = try await healthKitService.fetchEnergySums(
+            for: .activeEnergyBurned,
+            in: period.daysInterval,
+            unit: unit
+        )
+        
+        let totalDict = basalDict.merging(activeDict, uniquingKeysWith: +)
+        
+        basalPoints = basalDict
+            .map { makePoint($0.key, $0.value) }
+            .sorted { $0.date < $1.date }
+        
+        activePoints = activeDict
+            .map { makePoint($0.key, $0.value) }
+            .sorted { $0.date < $1.date }
+        
+        totalPoints = totalDict
+            .map { makePoint($0.key, $0.value) }
+            .sorted { $0.date < $1.date }
+    }
+    
     private func loadData() async {
         do {
-            let basalDict = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, unit: getChartUnit())
-            basalPoints = basalDict.map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
+            let unit = getChartUnit()
             
-            let activeDict = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, unit: getChartUnit())
-            activePoints = activeDict.map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }.sorted { $0.date < $1.date }
-            
-            let totalDict = basalDict.merging(activeDict) { basal, active in
-                basal + active
+            switch unit {
+            case .day:
+                try await loadData(
+                    unit: unit,
+                    makePoint: { date, value in
+                        DailyEnergyPoint(dayStart: date, kcal: value)
+                    }
+                )
+                
+            case .month:
+                try await loadData(
+                    unit: unit,
+                    makePoint: { date, value in
+                        MonthlyEnergyPoint(monthStart: date, kcal: value)
+                    }
+                )
+                
+            default:
+                try await loadData(
+                    unit: unit,
+                    makePoint: { date, value in
+                        DailyEnergyPoint(dayStart: date, kcal: value)
+                    }
+                )
             }
-            
-            totalPoints = totalDict
-                .map { DailyEnergyPoint(date: $0.key, kcal: $0.value) }
-                .sorted { $0.date < $1.date }
             
         } catch {
             print("Ошибка загрузки: \(error)")

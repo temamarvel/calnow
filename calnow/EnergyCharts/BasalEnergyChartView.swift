@@ -5,13 +5,25 @@ internal import HealthKit
 
 struct DailyEnergyPoint: EnergyPoint {
     let id = UUID()
-    let date: Date
+    let dayStart: Date
     let kcal: Double
+    
+    var date: Date { dayStart }
+    var value: Double { kcal }
+}
+
+struct MonthlyEnergyPoint: EnergyPoint {
+    let id = UUID()
+    let monthStart: Date
+    let kcal: Double
+    
+    var date: Date { monthStart }
+    var value: Double { kcal }
 }
 
 protocol EnergyPoint: Identifiable {
     var date: Date { get }
-    var kcal: Double { get }   // обобщённое числовое значение (ккал, среднее, сумма и т.п.)
+    var value: Double { get }   // обобщённое числовое значение (ккал, среднее, сумма и т.п.)
 }
 
 //struct DailyEnergyChartView: View {

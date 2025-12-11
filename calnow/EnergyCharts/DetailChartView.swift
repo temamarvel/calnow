@@ -10,9 +10,9 @@ import SwiftUI
 import Charts
 
 struct DetailChartView: View {
-    let points: [EnergyPoint]
+    let points: [any EnergyPoint]
     let unit: Calendar.Component
-    @State private var selectedPoint: EnergyPoint?
+    @State private var selectedPoint: (any EnergyPoint)?
     
     var body: some View {
         Chart {
@@ -26,12 +26,12 @@ struct DetailChartView: View {
             }
             
             
-            ForEach(points) { point in
+            ForEach(Array(points.enumerated()), id: \.offset) { _, point in
                 BarMark(
                     x: .value("Дата", point.date, unit: unit),
-                    y: .value("Ккал/день", point.kcal)
+                    y: .value("Ккал", point.value)
                 )
-                .foregroundStyle(selectedPoint?.id == point.id ? .orange : .blue)
+                .foregroundStyle(isSelected(point) ? .orange : .blue)
             }
         }
         .chartOverlay { proxy in
@@ -79,8 +79,15 @@ struct DetailChartView: View {
         }
     }
     
+    func isSelected(_ point: any EnergyPoint) -> Bool {
+        guard let selectedPoint else { return false }
+        // Сравниваем по дате с нужной гранулярностью
+        let cal = Calendar.autoupdatingCurrent
+        return cal.isDate(point.date, equalTo: selectedPoint.date, toGranularity: unit)
+    }
+    
     @ViewBuilder
-    private func tooltip(for point: EnergyPoint) -> some View {
+    private func tooltip(for point: any EnergyPoint) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("ВСЕГО")
                 .font(.caption2)
@@ -88,7 +95,7 @@ struct DetailChartView: View {
             
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(
-                    Int(point.kcal),
+                    Int(point.value),
                     format: .number.grouping(.automatic) // 2 163
                 )
                 .font(.system(size: 28, weight: .semibold, design: .rounded))
@@ -117,17 +124,17 @@ struct DetailChartView: View {
     }
 }
 
-private let previewEnergyPoints: [EnergyPoint] = {
+private let previewEnergyPoints: [DailyEnergyPoint] = {
     let calendar = Calendar.current
     let today = calendar.startOfDay(for: .now)
     
     return (0..<7).compactMap { offset in
-        guard let date = calendar.date(byAdding: .day, value: -6 + offset, to: today) else {
-            return nil
+        guard let date = calendar.date(byAdding: .day, value: -6 + Int(offset), to: today) else {
+            return DailyEnergyPoint(dayStart: Date(), kcal: 0)
         }
         let base: Double = 2200
         let delta = Double(Int.random(in: -300...300))
-        return EnergyPoint(date: date, kcal: base + delta)
+        return DailyEnergyPoint(dayStart: date, kcal: base + delta)
     }
 }()
 
