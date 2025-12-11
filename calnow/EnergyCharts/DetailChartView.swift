@@ -14,6 +14,8 @@ struct DetailChartView: View {
     let unit: Calendar.Component
     @State private var selectedPoint: (any EnergyPoint)?
     
+    @State private var tooltipSize: CGSize = .zero
+    
     var body: some View {
         Chart {
             // Вертикальная линия для выбранного дня
@@ -36,6 +38,8 @@ struct DetailChartView: View {
         }
         .chartOverlay { proxy in
             GeometryReader { geo in
+                let overlaySize = geo.size
+                
                 ZStack{
                     Rectangle()
                         .fill(.clear)
@@ -68,11 +72,39 @@ struct DetailChartView: View {
                         // x внутри overlay (учитываем отступ plotFrame)
                         let tooltipX = xPos + frame.origin.x
                         // y чуть выше верхней границы plotFrame
-                        let tooltipY = frame.origin.y - 12
+                        let tooltipY = frame.origin.y
                         
-                        tooltip(for: selectedPoint)
-                            //.fixedSize()          // пусть сам подбирает размер
-                            .position(x: tooltipX, y: max(tooltipY, 0 + 32)) // чтобы не уехал за край
+                        
+                        let halfW = tooltipSize.width / 2
+                        let halfH = tooltipSize.height / 2
+                        
+                        // Зажимаем по горизонтали/вертикали
+                        let clampedX = min(max(tooltipX, halfW), overlaySize.width  - halfW)
+                        let clampedY = min(max(tooltipY, halfH), overlaySize.height - halfH)
+                        
+                        ZStack {
+                            // 1) Невидимый тултип — только для измерения
+                            //TODO: do it better
+                            tooltip(for: selectedPoint)
+                                .opacity(0)
+                                .background(
+                                    GeometryReader { tooltipGeo in
+                                        Color.clear
+                                            .onAppear {
+                                                tooltipSize = tooltipGeo.size
+                                            }
+                                            .onChange(of: tooltipGeo.size) { _, newSize in
+                                                tooltipSize = newSize
+                                            }
+                                    }
+                                )
+
+                            // 2) Видимый тултип с правильной позицией
+                            if tooltipSize != .zero {
+                                tooltip(for: selectedPoint)
+                                    .position(x: clampedX, y: clampedY)
+                            }
+                        }
                     }
                 }
             }
@@ -143,6 +175,6 @@ private let previewEnergyPoints: [DailyEnergyPoint] = {
 
 #Preview("Detail") {
     DetailChartView(points: previewEnergyPoints, unit: .day)
-            .frame(height: 300)
-            .padding()
+        .frame(height: 300)
+        .padding()
 }

@@ -22,7 +22,6 @@ struct DetailsView: View {
         totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count)
     }
     
-    
     private func loadData(unit: Calendar.Component,makePoint: (Date, Double) -> any EnergyPoint
     ) async throws {
         let basalDict = try await healthKitService.fetchEnergySums(
