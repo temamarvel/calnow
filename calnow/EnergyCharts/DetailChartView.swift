@@ -92,18 +92,18 @@ struct DetailChartView: View {
     @ViewBuilder
     private func tooltip(for point: any EnergyPoint) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("ВСЕГО")
+            Text("Среднее")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(
-                    Int(point.value),
+                    Int(point.average),
                     format: .number.grouping(.automatic) // 2 163
                 )
                 .font(.system(size: 28, weight: .semibold, design: .rounded))
                 
-                Text("ккал")
+                Text("ккал/день")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -19,7 +19,7 @@ struct DetailsView: View {
     @Environment(\.healthDataService) private var healthKitService
     
     var averageTotal: Double {
-        totalPoints.map(\.value).reduce(0, +) / Double(totalPoints.count)
+        totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count)
     }
     
     

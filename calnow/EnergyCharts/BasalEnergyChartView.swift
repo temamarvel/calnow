@@ -10,6 +10,7 @@ struct DailyEnergyPoint: EnergyPoint {
     
     var date: Date { dayStart }
     var value: Double { kcal }
+    var average: Double { kcal }
 }
 
 struct MonthlyEnergyPoint: EnergyPoint {
@@ -19,11 +20,26 @@ struct MonthlyEnergyPoint: EnergyPoint {
     
     var date: Date { monthStart }
     var value: Double { kcal }
+    var average: Double {
+        let calendar = Calendar.current
+        
+        guard let daysRange = calendar.range(of: .day, in: .month, for: monthStart) else {
+            return kcal
+        }
+        
+        let daysCount = daysRange.count
+        guard daysCount > 0 else {
+            return kcal
+        }
+        
+        return kcal / Double(daysCount)
+    }
 }
 
 protocol EnergyPoint: Identifiable {
     var date: Date { get }
-    var value: Double { get }   // обобщённое числовое значение (ккал, среднее, сумма и т.п.)
+    var value: Double { get }
+    var average: Double { get }
 }
 
 //struct DailyEnergyChartView: View {
