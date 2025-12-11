@@ -76,6 +76,9 @@ struct DetailChartView: View {
                     }
                 }
             }
+            .onChange(of: points.count) { _ , _ in
+                selectedPoint = nil
+            }
         }
     }
     
