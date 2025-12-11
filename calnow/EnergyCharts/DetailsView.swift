@@ -18,6 +18,10 @@ struct DetailsView: View {
     
     @Environment(\.healthDataService) private var healthKitService
     
+    var averageTotal: Double {
+        totalPoints.map(\.value).reduce(0, +) / Double(totalPoints.count)
+    }
+    
     
     private func loadData(unit: Calendar.Component,makePoint: (Date, Double) -> any EnergyPoint
     ) async throws {
@@ -105,6 +109,25 @@ struct DetailsView: View {
                 }
             }
             .pickerStyle(.segmented)
+            
+            VStack(alignment: .leading){
+                Text("Среднее")
+                Text("\(averageTotal, format: .number.precision(.fractionLength(0))) ккал/день")
+                let dateRange: Range<Date> = period.daysInterval.start..<period.daysInterval.end
+
+                Text(
+                    dateRange,
+                    format: .interval
+                        .day()
+                        .month(.abbreviated)
+                        .year()
+                )
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(.regularMaterial) // на тёмной будет почти как чёрный
+            )
             
             DetailChartView(points: totalPoints, unit: getChartUnit())
         }
