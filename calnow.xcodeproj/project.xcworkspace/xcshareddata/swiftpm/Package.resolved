@@ -16,7 +16,25 @@
       "location" : "https://github.com/temamarvel/HealthKitDataService.git",
       "state" : {
         "branch" : "main",
-        "revision" : "6f33fc2b045fdb7cb27fd1bf565f2eff9ff8861c"
+        "revision" : "b17b6f2d303165f7ae1136960b76535f07363327"
+      }
+    },
+    {
+      "identity" : "swift-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-algorithms",
+      "state" : {
+        "revision" : "87e50f483c54e6efd60e885f7f5aa946cee68023",
+        "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics.git",
+      "state" : {
+        "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
+        "version" : "1.1.1"
       }
     }
   ],
