@@ -18,8 +18,12 @@ struct DetailsView: View {
     
     @Environment(\.healthDataService) private var healthKitService
     
-    var averageTotal: Double {
-        totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count)
+    var averageTotal: Int {
+        guard !totalPoints.isEmpty else {
+            return 0
+        }
+        
+        return Int(totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count))
     }
     
     private func loadData(by aggregate: AggregatePeriod, makePoint: (Date, Double) -> any EnergyPoint
@@ -117,11 +121,25 @@ struct DetailsView: View {
             }
             .pickerStyle(.segmented)
             
-            VStack(alignment: .leading){
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Среднее")
-                Text("\(averageTotal, format: .number.precision(.fractionLength(0))) ккал/день")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    Text(
+                        averageTotal,
+                        format: .number.grouping(.automatic) // 2 163
+                    )
+                    .font(.system(size: 28, weight: .semibold, design: .rounded))
+                    
+                    Text("ккал/день")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                
                 let dateRange: Range<Date> = period.daysInterval.start..<period.daysInterval.end
-
+                
                 Text(
                     dateRange,
                     format: .interval
@@ -129,12 +147,17 @@ struct DetailsView: View {
                         .month(.abbreviated)
                         .year()
                 )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
             }
-            .padding()
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(.regularMaterial) // на тёмной будет почти как чёрный
             )
+            
             
             DetailChartView(points: totalPoints, unit: getChartUnit())
         }
