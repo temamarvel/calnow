@@ -22,18 +22,18 @@ struct DetailsView: View {
         totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count)
     }
     
-    private func loadData(unit: Calendar.Component,makePoint: (Date, Double) -> any EnergyPoint
+    private func loadData(by aggregate: AggregatePeriod, makePoint: (Date, Double) -> any EnergyPoint
     ) async throws {
         let basalDict = try await healthKitService.fetchEnergySums(
             for: .basalEnergyBurned,
             in: period.daysInterval,
-            unit: unit
+            by: aggregate
         )
         
         let activeDict = try await healthKitService.fetchEnergySums(
             for: .activeEnergyBurned,
             in: period.daysInterval,
-            unit: unit
+            by: aggregate
         )
         
         let totalDict = basalDict.merging(activeDict, uniquingKeysWith: +)
@@ -53,12 +53,12 @@ struct DetailsView: View {
     
     private func loadData() async {
         do {
-            let unit = getChartUnit()
+            let aggregate = getAggregatePeriod()
             
-            switch unit {
+            switch aggregate {
             case .day:
                 try await loadData(
-                    unit: unit,
+                    by: aggregate,
                     makePoint: { date, value in
                         DailyEnergyPoint(dayStart: date, kcal: value)
                     }
@@ -66,7 +66,7 @@ struct DetailsView: View {
                 
             case .month:
                 try await loadData(
-                    unit: unit,
+                    by: aggregate,
                     makePoint: { date, value in
                         MonthlyEnergyPoint(monthStart: date, kcal: value)
                     }
@@ -74,7 +74,7 @@ struct DetailsView: View {
                 
             default:
                 try await loadData(
-                    unit: unit,
+                    by: aggregate,
                     makePoint: { date, value in
                         DailyEnergyPoint(dayStart: date, kcal: value)
                     }
@@ -87,6 +87,14 @@ struct DetailsView: View {
     }
     
     private func getChartUnit() -> Calendar.Component {
+        switch period {
+            case .last7Days: return .day
+            case .last30Days: return .day
+            case .last180Days: return .month
+        }
+    }
+    
+    private func getAggregatePeriod() -> AggregatePeriod {
         switch period {
             case .last7Days: return .day
             case .last30Days: return .day

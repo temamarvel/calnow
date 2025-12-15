@@ -88,7 +88,7 @@ final class MockHealthDataService: HealthDataService {
         let today = calendar.startOfDay(for: Date())
         let interval = DateInterval(start: today, end: Date())
         
-        let daily = try await fetchEnergySums(for: id, in: interval, unit: .day)
+        let daily = try await fetchEnergySums(for: id, in: interval, by: .day)
         // Для сегодняшнего дня берём значение по сегодняшней дате (или 0)
         return daily[today] ?? 0
     }
@@ -96,7 +96,7 @@ final class MockHealthDataService: HealthDataService {
     public func fetchEnergySums(
         for id: HKQuantityTypeIdentifier,
         in interval: DateInterval,
-        unit: Calendar.Component
+        by: AggregatePeriod
     ) async throws -> [Date : Double] {
         let calendar = Calendar.current
         

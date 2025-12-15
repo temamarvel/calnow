@@ -76,13 +76,13 @@ struct MainDashboardView: View {
             let active = try await healthKitService.fetchEnergyToday(for: .activeEnergyBurned)
             actualTotal = basal + active
             
-            let basalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, unit: .day).values.reduce(0, +)
-            let activeSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, unit: .day).values.reduce(0, +)
+            let basalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
+            let activeSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
             average30Total = (basalSum + activeSum)/Double(period.daysCount)
             
             let currentWeekInterval = getCurrentWeekInterval()
-            let weekBasalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: currentWeekInterval, unit: .day).values.reduce(0, +)
-            let weekActiveSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: currentWeekInterval, unit: .day).values.reduce(0, +)
+            let weekBasalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: currentWeekInterval, by: .day).values.reduce(0, +)
+            let weekActiveSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: currentWeekInterval, by: .day).values.reduce(0, +)
             weekTotal = weekBasalSum + weekActiveSum
         } catch {
             print("Не удалось загрузить totalEnergyToday: \(error)")
