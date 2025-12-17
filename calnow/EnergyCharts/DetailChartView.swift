@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Charts
+import HealthKitDataService
 
 struct DetailChartView: View {
     let points: [any EnergyPoint]
@@ -50,12 +51,11 @@ struct DetailChartView: View {
                                     let location = value.location
                                     
                                     if let date: Date = proxy.value(atX: location.x) {
-                                        if let nearest = points.min(by: {
-                                            abs($0.date.timeIntervalSince(date)) <
-                                                abs($1.date.timeIntervalSince(date))
-                                        }) {
-                                            selectedPoint = nearest
-                                        }
+                                        
+                                        let periodStart = getPeriodStart(for: date, unit: unit)
+
+                                        // 3) ищем точку с таким бакетом (или ближайшую)
+                                        selectedPoint = nearestPoint(in: points, to: periodStart, unit: unit)
                                     }
                                 }
                             
@@ -112,6 +112,38 @@ struct DetailChartView: View {
                 selectedPoint = nil
             }
         }
+    }
+    
+    func getPeriodStart(for date: Date, unit: Calendar.Component, calendar: Calendar = .current) -> Date {
+        switch unit {
+        case .day:
+            return calendar.startOfDay(for: date)
+
+//        case .weekOfYear:
+//            // начало недели с учётом локали
+//            return calendar.dateInterval(of: .weekOfYear, for: date)!.start
+
+        case .month:
+            return calendar.startOfMonth(for: date)
+
+        default:
+            // на случай, если ты используешь другие компоненты
+            return calendar.startOfDay(for: date)
+        }
+    }
+    
+    func nearestPoint(in points: [any EnergyPoint], to periodStart: Date, unit: Calendar.Component, calendar: Calendar = .current) -> (any EnergyPoint)? {
+        guard !points.isEmpty else { return nil }
+
+        // Быстрый путь: точное совпадение бакета
+        if let exactPoint = points.first(where: { $0.date == periodStart }) {
+            return exactPoint
+        }
+
+        // Fallback: ближайшая по времени (в секундах)
+        return points.min(by: {
+            abs($0.date.timeIntervalSince(periodStart)) < abs($1.date.timeIntervalSince(periodStart))
+        })
     }
     
     func isSelected(_ point: any EnergyPoint) -> Bool {
