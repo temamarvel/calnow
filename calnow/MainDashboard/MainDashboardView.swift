@@ -72,16 +72,23 @@ struct MainDashboardView: View {
     
     private func loadActualTotal() async {
         do {
-            let basal = try await healthKitService.fetchEnergyToday(for: .basalEnergyBurned)
+            //let basal = try await healthKitService.fetchEnergyToday(for: .basalEnergyBurned)
             let active = try await healthKitService.fetchEnergyToday(for: .activeEnergyBurned)
-            actualTotal = basal + active
+            actualTotal = (Double(Calendar.current.component(.hour, from: Date())) / 24.0) * bmr + active
             
-            let basalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
+//            let basalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
+            
+            let basalSum = Dictionary(
+                uniqueKeysWithValues: period.daysInterval.daysSequence().lazy.map { ($0, bmr) }
+            ).values.reduce(0, +)
+            
             let activeSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
             average30Total = (basalSum + activeSum)/Double(period.daysCount)
             
             let currentWeekInterval = getCurrentWeekInterval()
-            let weekBasalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: currentWeekInterval, by: .day).values.reduce(0, +)
+            let weekBasalSum = Dictionary(
+                uniqueKeysWithValues: currentWeekInterval.daysSequence().lazy.map { ($0, bmr) }
+            ).values.reduce(0, +)
             let weekActiveSum = try await healthKitService.fetchEnergySums(for: .activeEnergyBurned, in: currentWeekInterval, by: .day).values.reduce(0, +)
             weekTotal = weekBasalSum + weekActiveSum
         } catch {
