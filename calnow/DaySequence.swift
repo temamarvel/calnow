@@ -64,11 +64,20 @@ struct MonthSequence: Sequence, IteratorProtocol {
 
 extension DateInterval {
     /// Ленивый итератор по дням интервала (начало суток каждого дня)
-    func daysSequence(using calendar: Calendar = .current) -> DaySequence {
+    func daysSequence(calendar: Calendar = .current) -> DaySequence {
         DaySequence(start: start, end: end, calendar: calendar)
     }
     
-    func monthsSequence(using calendar: Calendar = .current) -> MonthSequence {
+    func monthsSequence(calendar: Calendar = .current) -> MonthSequence {
         MonthSequence(start: start, end: end, calendar: calendar)
+    }
+    
+    func periods(by aggregate: AggregatePeriod) -> AnySequence<Date> {
+        switch aggregate{
+            case .day: return AnySequence(daysSequence())
+            case .month: return AnySequence(monthsSequence())
+                //TODO:
+            case .week: return AnySequence(daysSequence())
+        }
     }
 }

@@ -36,28 +36,15 @@ struct DetailsView: View {
         return Int(totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count))
     }
     
-    func getSequence(interval: DateInterval, aggregate: AggregatePeriod) -> AnySequence<Date> {
-        switch aggregate{
-        case .day: return AnySequence(interval.daysSequence())
-        case .month: return AnySequence(interval.monthsSequence())
-            //TODO:
-        case .week: return AnySequence(interval.daysSequence())
-        }
-    }
+    
     
     private func loadData(by aggregate: AggregatePeriod, makePoint: (Date, Double) -> any EnergyPoint
     ) async throws {
-//        let basalDict = try await healthKitService.fetchEnergySums(
-//            for: .basalEnergyBurned,
-//            in: period.daysInterval,
-//            by: aggregate
-//        )
-        
-        var basalDict = Dictionary(
-            uniqueKeysWithValues: getSequence(interval: period.daysInterval, aggregate: aggregate).lazy.map { ($0, bmr) }
+        let basalDict = try await healthKitService.fetchEnergySums(
+            for: .basalEnergyBurned,
+            in: period.daysInterval,
+            by: aggregate
         )
-        
-        basalDict[Calendar.current.startOfDay(for: Date())] = (Double(Calendar.current.component(.hour, from: Date())) / 24.0) * bmr
         
         let activeDict = try await healthKitService.fetchEnergySums(
             for: .activeEnergyBurned,

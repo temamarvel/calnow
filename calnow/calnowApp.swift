@@ -46,13 +46,51 @@ extension EnvironmentValues {
 
 @main
 struct CalNowApp: App {
-    @StateObject private var healthKitService = HealthKitDataService()
+    private let container: ModelContainer
+    
+    @StateObject private var healthKitService: HealthKitDataUserBMRService
+    
+//    = {
+//        let healthKitDataService = HealthKitDataService()
+//        return HealthKitDataUserBMRService(
+//            baseHealthDataService: healthKitDataService,
+//        )
+//    }()= {
+//        let healthKitDataService = HealthKitDataService()
+//        return HealthKitDataUserBMRService(
+//            baseHealthDataService: healthKitDataService,
+//        )
+//    }()
+    
+    func loadFirstProfileBMR(container: ModelContainer) throws -> Double {
+        let context = container.mainContext
+        
+        var d = FetchDescriptor<UserProfile>()
+        d.fetchLimit = 1
+        
+        return try context.fetch(d).first?.bmr ?? 0
+    }
+    
+    init() {
+        container = try! ModelContainer(for: UserProfile.self)
+        
+        do{
+            let healthKitDataService = HealthKitDataService()
+            let service = HealthKitDataUserBMRService(baseHealthDataService: healthKitDataService, bmr: try loadFirstProfileBMR(container: container))
+            
+            _healthKitService = StateObject(wrappedValue: service)
+        }
+        catch{
+            print("Не удалось создать HealthKitDataUserBMRService: \(error)")
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(\.healthDataService, healthKitService)
         }
-        .modelContainer(for: UserProfile.self)
-        .environment(\.healthDataService, healthKitService)
+        .modelContainer(container)
+        
     }
 }
