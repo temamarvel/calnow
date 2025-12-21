@@ -61,6 +61,20 @@ final class HealthKitDataUserBMRService: ObservableObject, HealthDataService{
     }
     
     func getBasalEnergyData(for interval: DateInterval, by aggregate: AggregatePeriod) -> [Date: Double] {
+        let df = DateFormatter()
+        df.locale = .autoupdatingCurrent
+        df.timeZone = .autoupdatingCurrent
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZZ"
+        
+        print("start \(df.string(from: interval.start))")
+        print("end   \(df.string(from: interval.end))")
+        
+//        print("start \(interval.start)")
+//        print("end \(interval.end)")
+        for period in interval.periods(by: aggregate) {
+            print("period \(df.string(from:period))")
+        }
+        
         return Dictionary(
             uniqueKeysWithValues: interval.periods(by: aggregate).lazy.map { date in
                 (date, Calendar.current.isDateInToday(date) ? self.basalEnergyNow : self.bmr)

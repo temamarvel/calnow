@@ -9,25 +9,26 @@
 import Foundation
 internal import HealthKit
 internal import Combine
+import HealthKitDataService
 
 enum PredefinedDateInterval: String, CaseIterable, Identifiable {
     case last7Days
     case last30Days
-    case last180Days
+    case last6Month
     
     var id: Self { self }
     
-        var title: String {
-            switch self {
-                case .last7Days:   return "7 дней"
-                case .last30Days:  return "30 дней"
-                case .last180Days: return "180 дней"
-            }
+    var title: String {
+        switch self {
+            case .last7Days:   return "7 дней"
+            case .last30Days:  return "30 дней"
+            case .last6Month: return "6 мсяцев"
         }
+    }
     
     
     private func getDateInterval(for offsetDays: Int) -> DateInterval {
-//        let startDate = Calendar.current.startOfDay(for: Date())
+        //        let startDate = Calendar.current.startOfDay(for: Date())
         let now = Date()
         
         // Дата offsetDays дней назад
@@ -37,9 +38,9 @@ enum PredefinedDateInterval: String, CaseIterable, Identifiable {
         }
         
         // Начало суток того дня (00:00 локального календаря/таймзоны)
-        let startOfDay = Calendar.current.startOfDay(for: offsetDate)
+        let startOfInterval = self == .last6Month ? Calendar.current.startOfMonth(for: offsetDate)  : Calendar.current.startOfDay(for: offsetDate)
         
-        return DateInterval(start: startOfDay, end: now)
+        return DateInterval(start: startOfInterval, end: now)
     }
     
     var daysInterval: DateInterval {
@@ -50,7 +51,7 @@ enum PredefinedDateInterval: String, CaseIterable, Identifiable {
         switch self {
             case .last7Days:   return 7
             case .last30Days:  return 30
-            case .last180Days: return 180
+            case .last6Month: return 180
         }
     }
 }

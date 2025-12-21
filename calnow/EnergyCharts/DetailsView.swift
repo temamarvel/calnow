@@ -106,7 +106,7 @@ struct DetailsView: View {
         switch period {
             case .last7Days: return .day
             case .last30Days: return .day
-            case .last180Days: return .month
+            case .last6Month: return .month
         }
     }
     
@@ -114,7 +114,7 @@ struct DetailsView: View {
         switch period {
             case .last7Days: return .day
             case .last30Days: return .day
-            case .last180Days: return .month
+            case .last6Month: return .month
         }
     }
     
