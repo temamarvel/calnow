@@ -69,6 +69,10 @@ final class HealthKitDataUserBMRService: ObservableObject, HealthDataService{
         print("start \(df.string(from: interval.start))")
         print("end   \(df.string(from: interval.end))")
         
+        print("days count   \(interval.calendarDaysCount())")
+        
+        
+        
 //        print("start \(interval.start)")
 //        print("end \(interval.end)")
         for period in interval.periods(by: aggregate) {
@@ -77,7 +81,7 @@ final class HealthKitDataUserBMRService: ObservableObject, HealthDataService{
         
         return Dictionary(
             uniqueKeysWithValues: interval.periods(by: aggregate).lazy.map { date in
-                (date, Calendar.current.isDateInToday(date) ? self.basalEnergyNow : self.bmr)
+                (date, Calendar.current.isDateInToday(date) ? self.basalEnergyNow : aggregate == .month ? Double(date.daysInMonth()) * self.bmr : self.bmr)
             }
         )
     }

@@ -80,4 +80,12 @@ extension DateInterval {
             case .week: return AnySequence(daysSequence())
         }
     }
+    
+    func calendarDaysCount(calendar: Calendar = .current) -> Int {
+        let startDay = calendar.startOfDay(for: start)
+        let endDay = calendar.startOfDay(for: end)
+        
+        let days = calendar.dateComponents([.day], from: startDay, to: endDay).day ?? 0
+        return max(days, 0)
+    }
 }

@@ -44,14 +44,20 @@ enum PredefinedDateInterval: String, CaseIterable, Identifiable {
     }
     
     var daysInterval: DateInterval {
-        return getDateInterval(for: self.daysCount)
+        //return getDateInterval(for: self.daysCount)
+        
+        switch self {
+            case .last7Days:   return getDateInterval(for: 7)
+            case .last30Days:  return getDateInterval(for: 30)
+            case .last6Month: return getDateInterval(for: 180)
+        }
     }
     
     var daysCount: Int {
         switch self {
             case .last7Days:   return 7
             case .last30Days:  return 30
-            case .last6Month: return 180
+            case .last6Month: return daysInterval.calendarDaysCount()
         }
     }
 }
