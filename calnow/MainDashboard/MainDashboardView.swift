@@ -74,7 +74,7 @@ struct MainDashboardView: View {
         do {
             let basal = try await healthKitService.fetchEnergyToday(for: .basalEnergyBurned)
             let active = try await healthKitService.fetchEnergyToday(for: .activeEnergyBurned)
-            actualTotal = (Double(Calendar.current.component(.hour, from: Date())) / 24.0) * bmr + active
+            actualTotal = basal + active
             
             let basalSum = try await healthKitService.fetchEnergySums(for: .basalEnergyBurned, in: period.daysInterval, by: .day).values.reduce(0, +)
             
