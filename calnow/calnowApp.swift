@@ -62,7 +62,7 @@ struct CalNowApp: App {
 //        )
 //    }()
     
-    func loadFirstProfileBMR(container: ModelContainer) throws -> Double {
+    static func loadFirstProfileBMR(container: ModelContainer) throws -> Double {
         let context = container.mainContext
         
         var d = FetchDescriptor<UserProfile>()
@@ -74,15 +74,22 @@ struct CalNowApp: App {
     init() {
         container = try! ModelContainer(for: UserProfile.self)
         
-        do{
-            let healthKitDataService = HealthKitDataService()
-            let service = HealthKitDataUserBMRService(baseHealthDataService: healthKitDataService, bmr: try loadFirstProfileBMR(container: container))
-            
-            _healthKitService = StateObject(wrappedValue: service)
+        let healthKitDataService = HealthKitDataService()
+        
+        let bmr: Double
+        do {
+            bmr = try CalNowApp.loadFirstProfileBMR(container: container)
+        } catch {
+            print("Не удалось загрузить BMR: \(error)")
+            bmr = 0
         }
-        catch{
-            print("Не удалось создать HealthKitDataUserBMRService: \(error)")
-        }
+        
+        let service = HealthKitDataUserBMRService(
+            baseHealthDataService: healthKitDataService,
+            bmr: bmr
+        )
+        
+        _healthKitService = StateObject(wrappedValue: service)
     }
     
     var body: some Scene {
