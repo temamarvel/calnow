@@ -23,11 +23,22 @@ struct MonthlyEnergyPoint: EnergyPoint {
     var average: Double {
         let calendar = Calendar.current
         
-        guard let daysRange = calendar.range(of: .day, in: .month, for: monthStart) else {
-            return kcal
-        }
+//        guard let daysRange = DateInterval(start: monthStart, end: Date()) else {
+//            return kcal
+//        }
+        let start = monthStart
+        let end = min(Date(), calendar.date(byAdding: .month, value: 1, to: start)!) // не включительно
+        let monthInterval = DateInterval(start: start, end: end)
         
-        let daysCount = daysRange.count
+        let df = DateFormatter()
+        df.locale = .autoupdatingCurrent
+        df.timeZone = .autoupdatingCurrent
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZZ"
+        
+        
+        print("month start: \(df.string(from: monthStart))")
+        let daysCount = monthInterval.calendarDaysCount()
+        print("days count: \(daysCount)")
         guard daysCount > 0 else {
             return kcal
         }
