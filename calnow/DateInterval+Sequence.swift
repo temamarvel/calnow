@@ -26,7 +26,7 @@ struct DaySequence: Sequence, IteratorProtocol {
     }
 
     mutating func next() -> Date? {
-        guard let date = current, date < end else {
+        guard let date = current, date <= end else {
             return nil
         }
 
