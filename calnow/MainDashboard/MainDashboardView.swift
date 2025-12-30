@@ -19,8 +19,8 @@ struct DetailCardView: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        //.shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
     }
 }
 
