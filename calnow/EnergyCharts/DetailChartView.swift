@@ -36,7 +36,7 @@ struct DetailChartView: View {
                     x: .value("Дата", point.date, unit: unit),
                     y: .value("Ккал", point.value)
                 )
-                .foregroundStyle(isSelected(point) ? .orange : .blue)
+                .foregroundStyle(showAverage ? .gray : (isSelected(point) ? .orange : .blue))
             }
             
             if showAverage {
@@ -44,10 +44,10 @@ struct DetailChartView: View {
                     y: .value("Среднее", average)
                 )
                 .annotation(position: .top) {
-                    Text("Базальный: \(Int(average)) ккал/день")
+                    Text("\(Int(average)) ккал/день")
                         .font(.caption)
                         .padding(4)
-                        .background(.thinMaterial)
+                        .background(.ultraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
             }
