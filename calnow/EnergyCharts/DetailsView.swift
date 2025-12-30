@@ -167,13 +167,14 @@ struct DetailsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.regularMaterial) // на тёмной будет почти как чёрный
+                    .fill(.ultraThinMaterial) // на тёмной будет почти как чёрный
             )
             
             
             DetailChartView(points: totalPoints, unit: getChartUnit())
         }
         .padding()
+        .appBackground()
         .task {
             await loadData()
         }

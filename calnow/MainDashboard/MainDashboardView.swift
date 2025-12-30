@@ -96,86 +96,84 @@ struct MainDashboardView: View {
     var body: some View {
         NavigationStack {
             
-            ZStack{
-                Color.appBackground
-                    .ignoresSafeArea()
-                ScrollView{
-                    VStack(alignment: .leading, spacing: 16) {
-                        
-                        
-                        if profile == nil {
-                            Text("Профиль не заполнен")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+            
+            ScrollView{
+                VStack(alignment: .leading, spacing: 16) {
+                    
+                    
+                    if profile == nil {
+                        Text("Профиль не заполнен")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    VStack{
+                        ZStack{
+                            CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
+                                               enableGlow: true)
+                            VStack{
+                                Text("Осталось")
+                                Text("\(remainingTotal)")
+                                    .font(.largeTitle.scaled(multiplier: 2.0))
+                                    .fontWeight(.bold)
+                            }.foregroundStyle(.secondary)
+                            
                         }
                         
                         VStack{
-                            ZStack{
-                                CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
-                                                   enableGlow: true)
-                                VStack{
-                                    Text("Осталось")
-                                    Text("\(remainingTotal)")
-                                        .font(.largeTitle.scaled(multiplier: 2.0))
-                                        .fontWeight(.bold)
-                                }.foregroundStyle(.secondary)
-                                
-                            }
+                            DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
                             
-                            VStack{
-                                DetailCardView(value: "\(Int(actualTotal ?? 0)) / \(Int(tdee)) ккал", description: "Потрачено")
-                                
-                                DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за 30 дней")
-                                
-                                DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Потрачено с начала недели")
-                                
-                            }
-                        }
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 52, style: .continuous)
-                                .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
-                        )
-                        .shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
-                    }
-                    .onChange(of: scenePhase) { old, phase in
-                        if phase == .active {
-                            Task {
-                                await loadActualTotal()
-                            }
+                            DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за 30 дней")
+                            
+                            DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Потрачено с начала недели")
+                            
                         }
                     }
                     .padding()
-                    .navigationTitle("Сегодня")
-                    .task {
-                        await loadActualTotal()
-                    }
-                    //            .toolbar {
-                    //                ToolbarItem(placement: .primaryAction) {
-                    //                    Button {
-                    //                        vm.refreshToday()
-                    //                    } label: {
-                    //                        if vm.isLoading {
-                    //                            ProgressView()
-                    //                        } else {
-                    //                            Image(systemName: "arrow.clockwise")
-                    //                        }
-                    //                    }
-                    //                    .accessibilityLabel("Обновить данные за сегодня")
-                    //                    .disabled(vm.isLoading)
-                    //                }
-                    //            }
-                    //            .onAppear { vm.onAppear(context: modelContext) }
-                    //            .alert("Ошибка", isPresented: Binding(
-                    //                get: { vm.alertMessage != nil },
-                    //                set: { if !$0 { vm.alertMessage = nil } }
-                    //            )) {
-                    //                Button("OK", role: .cancel) { }
-                    //            } message: {
-                    //                Text(vm.alertMessage ?? "")
-                    //            }
+                    .background(
+                        RoundedRectangle(cornerRadius: 52, style: .continuous)
+                            .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+                    )
+                    .shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
                 }
+                .onChange(of: scenePhase) { old, phase in
+                    if phase == .active {
+                        Task {
+                            await loadActualTotal()
+                        }
+                    }
+                }
+                .padding()
+                .navigationTitle("Сегодня")
+                .task {
+                    await loadActualTotal()
+                }
+                //            .toolbar {
+                //                ToolbarItem(placement: .primaryAction) {
+                //                    Button {
+                //                        vm.refreshToday()
+                //                    } label: {
+                //                        if vm.isLoading {
+                //                            ProgressView()
+                //                        } else {
+                //                            Image(systemName: "arrow.clockwise")
+                //                        }
+                //                    }
+                //                    .accessibilityLabel("Обновить данные за сегодня")
+                //                    .disabled(vm.isLoading)
+                //                }
+                //            }
+                //            .onAppear { vm.onAppear(context: modelContext) }
+                //            .alert("Ошибка", isPresented: Binding(
+                //                get: { vm.alertMessage != nil },
+                //                set: { if !$0 { vm.alertMessage = nil } }
+                //            )) {
+                //                Button("OK", role: .cancel) { }
+                //            } message: {
+                //                Text(vm.alertMessage ?? "")
+                //            }
             }
+            .appBackground()
         }
     }
 }
