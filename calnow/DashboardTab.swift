@@ -10,7 +10,7 @@ import SwiftUI
 import SwiftData
 import HealthKitDataService
 
-enum DashboardTab { case current, charts }
+enum DashboardTab { case main, charts }
 
 
 struct DashboardRootContainer: View {
@@ -22,7 +22,9 @@ struct DashboardRootContainer: View {
 
 struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var tab: DashboardTab = .current
+    @Environment(\.scenePhase) private var scenePhase
+    
+    @State private var tab: DashboardTab = .main
     
     init(health: HealthDataService) { }
 
@@ -30,19 +32,24 @@ struct DashboardRootView: View {
         NavigationStack {
             Group {
                 switch tab {
-                case .current:
+                case .main:
                     MainDashboardView()
                 case .charts:
                     DetailsView()
                 }
             }
+            .onChange(of: scenePhase) { old, phase in
+                if phase == .active {
+                    tab = .main
+                }
+            }
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
                     Button {
-                        tab = .current
+                        tab = .main
                     } label: {
                         Label("Текущие", systemImage: "gauge.with.dots.needle.67percent")
-                            .fontWeight(tab == .current ? .semibold : .regular)
+                            .fontWeight(tab == .main ? .semibold : .regular)
                     }
 
                     Spacer()
