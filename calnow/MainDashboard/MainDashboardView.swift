@@ -16,9 +16,11 @@ struct DetailCardView: View {
                 .foregroundStyle(.secondary)
             Text(value).font(.title).fontWeight(.bold)
                 .foregroundStyle(.secondary)
-        }.padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
     }
 }
 
@@ -110,7 +112,7 @@ struct MainDashboardView: View {
                     VStack{
                         ZStack{
                             CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
-                                               enableGlow: true)
+                                               enableGlow: false)
                             VStack{
                                 Text("Осталось")
                                 Text("\(remainingTotal)")
@@ -126,15 +128,15 @@ struct MainDashboardView: View {
                             DetailCardView(value: "\(Int(average30Total ?? 0))", description: "Среднее за 30 дней")
                             
                             DetailCardView(value: "\(Int(weekTotal ?? 0))", description: "Потрачено с начала недели")
-                            
                         }
                     }
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 52, style: .continuous)
                             .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+                            .shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
                     )
-                    .shadow(color: .appShadow.opacity(0.12), radius: 40, x: 0, y: 5)
+                    
                 }
                 .onChange(of: scenePhase) { old, phase in
                     if phase == .active {
