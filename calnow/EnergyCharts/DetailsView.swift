@@ -17,6 +17,8 @@ struct DetailsView: View {
     @State private var activePoints: [any EnergyPoint] = []
     @State private var totalPoints: [any EnergyPoint] = []
     
+    @State private var showAverage: Bool = false
+    
     @Query private var profiles: [UserProfile]
     
     // Для простоты берём первый профиль
@@ -133,45 +135,55 @@ struct DetailsView: View {
             }
             .pickerStyle(.segmented)
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Среднее")
+            HStack(alignment: .center) {
+                
+                // Левая колонка (как сейчас)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Среднее")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(
+                            averageTotal,
+                            format: .number.grouping(.automatic)
+                        )
+                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+                        
+                        Text("ккал/день")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    let dateRange: Range<Date> =
+                    period.daysInterval.start..<period.daysInterval.end
+                    
+                    Text(
+                        dateRange,
+                        format: .interval
+                            .day()
+                            .month(.abbreviated)
+                            .year()
+                    )
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(
-                        averageTotal,
-                        format: .number.grouping(.automatic) // 2 163
-                    )
-                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                    
-                    Text("ккал/день")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
                 
-                let dateRange: Range<Date> = period.daysInterval.start..<period.daysInterval.end
+                Spacer()
                 
-                Text(
-                    dateRange,
-                    format: .interval
-                        .day()
-                        .month(.abbreviated)
-                        .year()
-                )
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                // Правый контрол
+                Toggle("", isOn: $showAverage).tint(.appSurfCoral)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.ultraThinMaterial) // на тёмной будет почти как чёрный
+                    .fill(.ultraThinMaterial)
             )
             
             
-            DetailChartView(points: totalPoints, unit: getChartUnit())
+            DetailChartView(points: totalPoints, average: averageTotal, showAverage: showAverage, unit: getChartUnit())
         }
         .padding()
         .appBackground()

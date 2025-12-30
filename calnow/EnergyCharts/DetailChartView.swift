@@ -12,6 +12,8 @@ import HealthKitDataService
 
 struct DetailChartView: View {
     let points: [any EnergyPoint]
+    let average: Int
+    let showAverage: Bool
     let unit: Calendar.Component
     @State private var selectedPoint: (any EnergyPoint)?
     
@@ -35,6 +37,19 @@ struct DetailChartView: View {
                     y: .value("Ккал", point.value)
                 )
                 .foregroundStyle(isSelected(point) ? .orange : .blue)
+            }
+            
+            if showAverage {
+                RuleMark(
+                    y: .value("Среднее", average)
+                )
+                .annotation(position: .top) {
+                    Text("Базальный: \(Int(average)) ккал/день")
+                        .font(.caption)
+                        .padding(4)
+                        .background(.thinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
             }
         }
         .chartOverlay { proxy in
@@ -206,7 +221,7 @@ private let previewEnergyPoints: [DailyEnergyPoint] = {
 }()
 
 #Preview("Detail") {
-    DetailChartView(points: previewEnergyPoints, unit: .day)
+    DetailChartView(points: previewEnergyPoints, average: 1800, showAverage: true, unit: .day)
         .frame(height: 300)
         .padding()
 }
