@@ -131,11 +131,11 @@ struct MainDashboardView: View {
                         }
                     }
                     .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 52, style: .continuous)
-                            .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
-                            .shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
-                    )
+//                    .background(
+//                        RoundedRectangle(cornerRadius: 52, style: .continuous)
+//                            .fill(.ultraThinMaterial) // или .regularMaterial на твой вкус
+//                            .shadow(color: .appShadow.opacity(0.32), radius: 40, x: 0, y: 5)
+//                    )
                     
                 }
                 .onChange(of: scenePhase) { old, phase in
