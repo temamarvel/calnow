@@ -42,7 +42,7 @@ struct DetailChartView: View {
                 RuleMark(
                     y: .value("Среднее", average)
                 )
-                .foregroundStyle(.appSurfCoral)
+                .foregroundStyle(.appSurfGradient0)
                 .annotation(position: .top) {
                     Text("\(Int(average)) ккал/день")
                         .font(.caption)

@@ -50,15 +50,15 @@ extension Color {
     
     // сам градиент (массив цветов)
     static let surfProgressGradient: [Color] = [
-        .appSurfCoral,
-        .appSurfOrange,
-        .appSurfSand,
+        .appSurfGradient0,
+        .appSurfGradient1,
+        .appSurfGradient2,
         .appSurfPalm,
         .appSurfPacific
     ]
     
     static let surfChartGradient: LinearGradient = LinearGradient(
-        gradient: Gradient(colors:[Color(.appSurfCoral), Color(.appSurfOrange), Color(.appSurfSunset)]),
+        gradient: Gradient(colors:[Color(.appSurfGradient0), Color(.appSurfGradient1), Color(.appSurfGradient2)]),
         startPoint: .bottom,
         endPoint: .top
     )

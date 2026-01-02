@@ -172,7 +172,7 @@ struct DetailsView: View {
                 Spacer()
                 
                 // Правый контрол
-                Toggle("", isOn: $showAverage).tint(.appSurfCoral)
+                Toggle("", isOn: $showAverage).tint(.appSurfGradient0)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
