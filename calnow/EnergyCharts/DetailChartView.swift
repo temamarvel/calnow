@@ -30,7 +30,7 @@ struct DetailChartView: View {
                 RuleMark(
                     x: .value("Дата", selectedPoint!.date, unit: unit)
                 )
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.gray.opacity(0.4))
                 .lineStyle(StrokeStyle(lineWidth: 1))
             }
             
