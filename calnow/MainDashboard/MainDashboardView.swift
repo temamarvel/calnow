@@ -112,7 +112,7 @@ struct MainDashboardView: View {
                     VStack{
                         ZStack{
                             CircleProgressView(progress: actualTotal!/plannedTotal, gradientColors: Color.surfProgressGradient,
-                                               enableGlow: false)
+                                               enableGlow: false, enableLighterTailColor: true)
                             VStack{
                                 Text("Осталось")
                                 Text("\(remainingTotal)")

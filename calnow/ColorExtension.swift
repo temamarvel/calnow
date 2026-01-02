@@ -53,8 +53,8 @@ extension Color {
         .appSurfGradient0,
         .appSurfGradient1,
         .appSurfGradient2,
-        .appSurfPalm,
-        .appSurfPacific
+//        .appSurfPalm,
+//        .appSurfPacific
     ]
     
     static let surfChartGradient: LinearGradient = LinearGradient(
