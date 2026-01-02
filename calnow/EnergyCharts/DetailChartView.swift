@@ -22,9 +22,9 @@ struct DetailChartView: View {
     var body: some View {
         Chart {
             // Вертикальная линия для выбранного дня
-            if let selectedPoint {
+            if selectedPoint != nil && !showAverage {
                 RuleMark(
-                    x: .value("Дата", selectedPoint.date, unit: unit)
+                    x: .value("Дата", selectedPoint!.date, unit: unit)
                 )
                 .foregroundStyle(.secondary)
                 .lineStyle(StrokeStyle(lineWidth: 1))
@@ -124,11 +124,10 @@ struct DetailChartView: View {
                             }
                         }
                     }
-                }.onChange(of: points.count) { _ , _ in
-                    selectedPoint = nil
                 }
             }
-                
+        }.onChange(of: points.count) { _ , _ in
+            selectedPoint = nil
         }
     }
     
