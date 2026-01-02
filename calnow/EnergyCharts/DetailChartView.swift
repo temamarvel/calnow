@@ -35,7 +35,7 @@ struct DetailChartView: View {
                     x: .value("Дата", point.date, unit: unit),
                     y: .value("Ккал", point.value)
                 )
-                .foregroundStyle(showAverage ? AnyShapeStyle(.ultraThinMaterial) : (isSelected(point) ? AnyShapeStyle(Color.surfChartGradient) : AnyShapeStyle(Color.surfChartGradient.opacity(0.3))))
+                .foregroundStyle(showAverage ? AnyShapeStyle(.gray.opacity(0.4)) : (isSelected(point) || selectedPoint == nil ? AnyShapeStyle(Color.surfChartGradient) : AnyShapeStyle(Color.surfChartGradient.opacity(0.3))))
             }
             
             if showAverage {
@@ -53,108 +53,111 @@ struct DetailChartView: View {
             }
         }
         .chartOverlay { proxy in
-            GeometryReader { geo in
-                let overlaySize = geo.size
-                
-                ZStack{
-                    Rectangle()
-                        .fill(.clear)
-                        .contentShape(Rectangle())
-                        .gesture(
-                            SpatialTapGesture()
-                                .onEnded { value in
-                                    let location = value.location
-                                    
-                                    if let date: Date = proxy.value(atX: location.x) {
-                                        
-                                        let periodStart = getPeriodStart(for: date, unit: unit)
-
-                                        // 3) ищем точку с таким бакетом (или ближайшую)
-                                        selectedPoint = nearestPoint(in: points, to: periodStart, unit: unit)
-                                    }
-                                }
-                            
-                            
-                        )
+            
+            if !showAverage {
+                GeometryReader { geo in
+                    let overlaySize = geo.size
                     
-                    if let selectedPoint,
-                       let plotFrame = proxy.plotFrame,
-                       let xPos = proxy.position(
-                        forX: selectedPoint.date
-                       ) {
-                        
-                        let frame = geo[plotFrame]
-                        // x внутри overlay (учитываем отступ plotFrame)
-                        let tooltipX = xPos + frame.origin.x
-                        // y чуть выше верхней границы plotFrame
-                        let tooltipY = frame.origin.y
-                        
-                        
-                        let halfW = tooltipSize.width / 2
-                        let halfH = tooltipSize.height / 2
-                        
-                        // Зажимаем по горизонтали/вертикали
-                        let clampedX = min(max(tooltipX, halfW), overlaySize.width  - halfW)
-                        let clampedY = min(max(tooltipY, halfH), overlaySize.height - halfH)
-                        
-                        ZStack {
-                            // 1) Невидимый тултип — только для измерения
-                            //TODO: do it better
-                            tooltip(for: selectedPoint)
-                                .opacity(0)
-                                .background(
-                                    GeometryReader { tooltipGeo in
-                                        Color.clear
-                                            .onAppear {
-                                                tooltipSize = tooltipGeo.size
-                                            }
-                                            .onChange(of: tooltipGeo.size) { _, newSize in
-                                                tooltipSize = newSize
-                                            }
+                    ZStack{
+                        Rectangle()
+                            .fill(.clear)
+                            .contentShape(Rectangle())
+                            .gesture(
+                                SpatialTapGesture()
+                                    .onEnded { value in
+                                        let location = value.location
+                                        
+                                        if let date: Date = proxy.value(atX: location.x) {
+                                            
+                                            let periodStart = getPeriodStart(for: date, unit: unit)
+                                            
+                                            // 3) ищем точку с таким бакетом (или ближайшую)
+                                            selectedPoint = nearestPoint(in: points, to: periodStart, unit: unit)
+                                        }
                                     }
-                                )
-
-                            // 2) Видимый тултип с правильной позицией
-                            if tooltipSize != .zero {
+                                
+                                
+                            )
+                        
+                        if let selectedPoint,
+                           let plotFrame = proxy.plotFrame,
+                           let xPos = proxy.position(
+                            forX: selectedPoint.date
+                           ) {
+                            
+                            let frame = geo[plotFrame]
+                            // x внутри overlay (учитываем отступ plotFrame)
+                            let tooltipX = xPos + frame.origin.x
+                            // y чуть выше верхней границы plotFrame
+                            let tooltipY = frame.origin.y
+                            
+                            
+                            let halfW = tooltipSize.width / 2
+                            let halfH = tooltipSize.height / 2
+                            
+                            // Зажимаем по горизонтали/вертикали
+                            let clampedX = min(max(tooltipX, halfW), overlaySize.width  - halfW)
+                            let clampedY = min(max(tooltipY, halfH), overlaySize.height - halfH)
+                            
+                            ZStack {
+                                // 1) Невидимый тултип — только для измерения
+                                //TODO: do it better
                                 tooltip(for: selectedPoint)
-                                    .position(x: clampedX, y: clampedY)
+                                    .opacity(0)
+                                    .background(
+                                        GeometryReader { tooltipGeo in
+                                            Color.clear
+                                                .onAppear {
+                                                    tooltipSize = tooltipGeo.size
+                                                }
+                                                .onChange(of: tooltipGeo.size) { _, newSize in
+                                                    tooltipSize = newSize
+                                                }
+                                        }
+                                    )
+                                
+                                // 2) Видимый тултип с правильной позицией
+                                if tooltipSize != .zero {
+                                    tooltip(for: selectedPoint)
+                                        .position(x: clampedX, y: clampedY)
+                                }
                             }
                         }
                     }
+                }.onChange(of: points.count) { _ , _ in
+                    selectedPoint = nil
                 }
             }
-            .onChange(of: points.count) { _ , _ in
-                selectedPoint = nil
-            }
+                
         }
     }
     
     func getPeriodStart(for date: Date, unit: Calendar.Component, calendar: Calendar = .current) -> Date {
         switch unit {
-        case .day:
-            return calendar.startOfDay(for: date)
-
-//        case .weekOfYear:
-//            // начало недели с учётом локали
-//            return calendar.dateInterval(of: .weekOfYear, for: date)!.start
-
-        case .month:
-            return calendar.startOfMonth(for: date)
-
-        default:
-            // на случай, если ты используешь другие компоненты
-            return calendar.startOfDay(for: date)
+            case .day:
+                return calendar.startOfDay(for: date)
+                
+                //        case .weekOfYear:
+                //            // начало недели с учётом локали
+                //            return calendar.dateInterval(of: .weekOfYear, for: date)!.start
+                
+            case .month:
+                return calendar.startOfMonth(for: date)
+                
+            default:
+                // на случай, если ты используешь другие компоненты
+                return calendar.startOfDay(for: date)
         }
     }
     
     func nearestPoint(in points: [any EnergyPoint], to periodStart: Date, unit: Calendar.Component, calendar: Calendar = .current) -> (any EnergyPoint)? {
         guard !points.isEmpty else { return nil }
-
+        
         // Быстрый путь: точное совпадение бакета
         if let exactPoint = points.first(where: { $0.date == periodStart }) {
             return exactPoint
         }
-
+        
         // Fallback: ближайшая по времени (в секундах)
         return points.min(by: {
             abs($0.date.timeIntervalSince(periodStart)) < abs($1.date.timeIntervalSince(periodStart))
@@ -221,7 +224,7 @@ private let previewEnergyPoints: [DailyEnergyPoint] = {
 }()
 
 #Preview("Detail") {
-    DetailChartView(points: previewEnergyPoints, average: 1800, showAverage: true, unit: .day)
+    DetailChartView(points: previewEnergyPoints, average: 1800, showAverage: false, unit: .day)
         .frame(height: 300)
         .padding()
         .appBackground()
