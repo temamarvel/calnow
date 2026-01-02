@@ -19,6 +19,10 @@ struct DetailChartView: View {
     
     @State private var tooltipSize: CGSize = .zero
     
+    private var upperBound: Double {
+        (points.map(\.value).max() ?? 0) * 1.3
+    }
+    
     var body: some View {
         Chart {
             // Вертикальная линия для выбранного дня
@@ -52,6 +56,7 @@ struct DetailChartView: View {
                 }
             }
         }
+        .chartYScale(domain: 0...upperBound)
         .chartOverlay { proxy in
             
             if !showAverage {
