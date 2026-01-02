@@ -30,19 +30,19 @@ struct DetailChartView: View {
                 .lineStyle(StrokeStyle(lineWidth: 1))
             }
             
-            
             ForEach(Array(points.enumerated()), id: \.offset) { _, point in
                 BarMark(
                     x: .value("Дата", point.date, unit: unit),
                     y: .value("Ккал", point.value)
                 )
-                .foregroundStyle(showAverage ? .gray : (isSelected(point) ? .orange : .blue))
+                .foregroundStyle(showAverage ? AnyShapeStyle(.ultraThinMaterial) : (isSelected(point) ? AnyShapeStyle(Color.surfChartGradient) : AnyShapeStyle(Color.surfChartGradient.opacity(0.3))))
             }
             
             if showAverage {
                 RuleMark(
                     y: .value("Среднее", average)
                 )
+                .foregroundStyle(.appSurfCoral)
                 .annotation(position: .top) {
                     Text("\(Int(average)) ккал/день")
                         .font(.caption)
@@ -224,4 +224,5 @@ private let previewEnergyPoints: [DailyEnergyPoint] = {
     DetailChartView(points: previewEnergyPoints, average: 1800, showAverage: true, unit: .day)
         .frame(height: 300)
         .padding()
+        .appBackground()
 }
