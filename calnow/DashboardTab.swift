@@ -39,7 +39,7 @@ struct DashboardRootView: View {
                 }
             }
             .onChange(of: scenePhase) { old, phase in
-                if phase == .active {
+                if phase == .inactive {
                     tab = .main
                 }
             }
