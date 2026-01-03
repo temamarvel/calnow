@@ -13,8 +13,8 @@ import SwiftData
 
 struct DetailsView: View {
     @State private var period: PredefinedDateInterval = .last7Days
-    @State private var basalPoints: [any EnergyPoint] = []
-    @State private var activePoints: [any EnergyPoint] = []
+//    @State private var basalPoints: [any EnergyPoint] = []
+//    @State private var activePoints: [any EnergyPoint] = []
     @State private var totalPoints: [any EnergyPoint] = []
     
     @State private var showAverage: Bool = false
@@ -56,13 +56,13 @@ struct DetailsView: View {
         
         let totalDict = basalDict.merging(activeDict, uniquingKeysWith: +)
         
-        basalPoints = basalDict
-            .map { makePoint($0.key, $0.value) }
-            .sorted { $0.date < $1.date }
-        
-        activePoints = activeDict
-            .map { makePoint($0.key, $0.value) }
-            .sorted { $0.date < $1.date }
+//        basalPoints = basalDict
+//            .map { makePoint($0.key, $0.value) }
+//            .sorted { $0.date < $1.date }
+//        
+//        activePoints = activeDict
+//            .map { makePoint($0.key, $0.value) }
+//            .sorted { $0.date < $1.date }
         
         totalPoints = totalDict
             .map { makePoint($0.key, $0.value) }
@@ -191,6 +191,7 @@ struct DetailsView: View {
             await loadData()
         }
         .onChange(of: period) { old, new in
+            totalPoints = []
             Task { await loadData() }
         }
     }
