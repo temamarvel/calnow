@@ -66,22 +66,30 @@ final class HealthKitDataUserBMRService: ObservableObject, HealthDataService{
         df.timeZone = .autoupdatingCurrent
         df.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZZ"
         
-        print("start \(df.string(from: interval.start))")
-        print("end   \(df.string(from: interval.end))")
+        //print("start \(df.string(from: interval.start))")
+        //print("end   \(df.string(from: interval.end))")
         
-        print("days count   \(interval.calendarDaysCount())")
+        //print("days count   \(interval.calendarDaysCount())")
         
         
         
 //        print("start \(interval.start)")
 //        print("end \(interval.end)")
-        for period in interval.periods(by: aggregate) {
-            print("period \(df.string(from:period))")
-        }
+//        for period in interval.periods(by: aggregate) {
+//            print("period \(df.string(from:period))")
+//        }
         
         return Dictionary(
             uniqueKeysWithValues: interval.periods(by: aggregate).lazy.map { date in
-                (date, Calendar.current.isDateInToday(date) ? self.basalEnergyNow : aggregate == .month ? Double(date.daysInMonth()) * self.bmr : self.bmr)
+                var value: Double = 0
+                
+                switch aggregate {
+                    case .day: value = Calendar.current.isDateInToday(date) ? self.basalEnergyNow : self.bmr
+                    case .week: value = 0 // TODO: implement week
+                    case .month: value = self.bmr * (Calendar.current.isDateInCurrentMonth(date) ? Double(Date().daysFromMonthStart()) : Double(date.daysInMonth()))
+                }
+//                let value = Calendar.current.isDateInToday(date) ? self.basalEnergyNow : aggregate == .month ? Double(date.daysInMonth()) * self.bmr : self.bmr
+                return (date, value)
             }
         )
     }

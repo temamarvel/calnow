@@ -35,6 +35,19 @@ struct DetailsView: View {
             return 0
         }
         
+        let df = DateFormatter()
+        df.locale = .autoupdatingCurrent
+        df.timeZone = .autoupdatingCurrent
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss ZZZZ"
+        
+        for point in totalPoints {
+            print("=====")
+            print("date = \(df.string(from: point.date))")
+            print("value = \(point.value)")
+            print("avarage = \(point.average)")
+            print("=====")
+        }
+        
         return Int(totalPoints.map(\.average).reduce(0, +) / Double(totalPoints.count))
     }
     
