@@ -8,49 +8,35 @@
 
 import SwiftUI
 import SwiftData
-import HealthKitDataService
 
-enum DashboardTab { case main, charts }
+enum DashboardTab : Hashable {
+    case main, charts
+}
 
 struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var tab: DashboardTab = .main
-
+    
     var body: some View {
-        NavigationStack {
-            Group {
-                switch tab {
-                case .main:
-                    MainDashboardView()
-                case .charts:
-                    DetailsView()
+        TabView(selection: $tab) {
+            MainDashboardView()
+                .tag(DashboardTab.main)
+                .tabItem {
+                    Label("Dashboard", systemImage: "flame.gauge.open")
                 }
-            }
-            .onChange(of: scenePhase) { old, phase in
-                if phase == .inactive {
-                    tab = .main
+            
+            
+            DetailsView()
+                .tag(DashboardTab.charts)
+                .tabItem {
+                    Label("Statistics", systemImage: "chart.bar.xaxis.ascending")
                 }
-            }
-            .toolbar {
-                ToolbarItemGroup(placement: .bottomBar) {
-                    Button {
-                        tab = .main
-                    } label: {
-                        Label("Текущие", systemImage: "gauge.with.dots.needle.67percent")
-                            .fontWeight(tab == .main ? .semibold : .regular)
-                    }
-
-                    Spacer()
-
-                    Button {
-                        tab = .charts
-                    } label: {
-                        Label("Графики", systemImage: "chart.line.uptrend.:")
-                            .fontWeight(tab == .charts ? .semibold : .regular)
-                    }
-                }
+        }
+        .onChange(of: scenePhase) { old, phase in
+            if phase == .inactive {
+                tab = .main
             }
         }
     }
