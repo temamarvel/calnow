@@ -16,7 +16,7 @@ struct RootView: View {
                             self.showOnboarding = false
                         }
                     } else {
-                        DashboardRootContainer()
+                        DashboardRootView()
                     }
                 } else {
                     ProgressView()

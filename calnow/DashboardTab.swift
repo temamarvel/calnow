@@ -12,21 +12,11 @@ import HealthKitDataService
 
 enum DashboardTab { case main, charts }
 
-
-struct DashboardRootContainer: View {
-    @Environment(\.healthDataService) private var healthKitService
-    var body: some View {
-        DashboardRootView(health: healthKitService) // ← передаём зависимость
-    }
-}
-
 struct DashboardRootView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var tab: DashboardTab = .main
-    
-    init(health: HealthDataService) { }
 
     var body: some View {
         NavigationStack {
