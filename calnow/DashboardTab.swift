@@ -55,3 +55,30 @@ struct DashboardRootView: View {
         }
     }
 }
+
+struct DashboardTabPreviewWrapper: View {
+    let container: ModelContainer
+    
+    init() {
+        // in-memory контейнер
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: UserProfile.self, configurations: config)
+        
+        let context = container.mainContext
+        
+        // тестовый профиль — подгони под свою модель
+        let profile = UserProfile()
+        //        profile.bmr = 1700
+        //        profile.tdee = 2600
+        context.insert(profile)
+    }
+    
+    var body: some View {
+        DashboardRootView()
+            .modelContainer(container)
+    }
+}
+
+#Preview("Dashboard tabs") {
+    DashboardTabPreviewWrapper()
+}
