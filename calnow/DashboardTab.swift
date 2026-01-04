@@ -24,9 +24,8 @@ struct DashboardRootView: View {
             MainDashboardView()
                 .tag(DashboardTab.main)
                 .tabItem {
-                    Label("Dashboard", systemImage: "flame.gauge.open")
+                    Label("Dashboard", systemImage: "flame")
                 }
-            
             
             DetailsView()
                 .tag(DashboardTab.charts)
