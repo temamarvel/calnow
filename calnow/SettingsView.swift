@@ -28,19 +28,7 @@ struct SettingsView: View {
     }
 }
 
-struct AppearanceView: View {
-    
-    var body: some View {
-        Text("Оформление")
-    }
-}
 
-struct ProfileView: View {
-    
-    var body: some View {
-        Text("Профиль")
-    }
-}
 
 #Preview {
     SettingsView()
