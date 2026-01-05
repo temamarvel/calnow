@@ -181,7 +181,7 @@ struct MainDashboardView: View {
                     SettingsView()
                 } label: {
                     Label("Настройки", systemImage: "gearshape")
-                }
+                }.tint(.secondary)
             }
         }
     }

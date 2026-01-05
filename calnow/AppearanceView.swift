@@ -31,7 +31,6 @@ enum AppTheme: String, CaseIterable, Identifiable {
     }
 }
 
-
 struct AppearanceView: View {
     
     @AppStorage("app_theme")
