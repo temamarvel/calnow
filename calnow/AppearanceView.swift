@@ -38,9 +38,7 @@ struct AppearanceView: View {
     private var theme: AppTheme = .system
     
     var body: some View {
-        
         NavigationStack{
-            
             List{
                 Picker("Тема", selection: $theme) {
                     ForEach(AppTheme.allCases) { theme in
@@ -49,12 +47,10 @@ struct AppearanceView: View {
                     }
                 }
                 .pickerStyle(.inline)
-                
-            }.scrollContentBackground(.hidden)
-            
-            
-                .navigationTitle("Оформление")
-                .appBackground()
+            }
+            .scrollContentBackground(.hidden)
+            .navigationTitle("Оформление")
+            .appBackground()
         }
     }
 }
