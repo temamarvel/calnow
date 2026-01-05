@@ -48,6 +48,9 @@ extension EnvironmentValues {
 struct CalNowApp: App {
     private let container: ModelContainer
     
+    @AppStorage("app_theme")
+    private var theme: AppTheme = .system
+    
     @StateObject private var healthKitService: HealthKitDataUserBMRService
     
 //    = {
@@ -96,8 +99,8 @@ struct CalNowApp: App {
         WindowGroup {
             RootView()
                 .environment(\.healthDataService, healthKitService)
+                .preferredColorScheme(theme.colorScheme)
         }
         .modelContainer(container)
-        
     }
 }
