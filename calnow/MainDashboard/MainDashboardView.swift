@@ -176,6 +176,13 @@ struct MainDashboardView: View {
                 //            }
             }
             .appBackground()
+            .toolbar{
+                NavigationLink() {
+                    SettingsView()
+                } label: {
+                    Label("Настройки", systemImage: "gearshape")
+                }
+            }
         }
     }
 }
