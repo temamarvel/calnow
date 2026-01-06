@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import HealthKitDataService
 
 // MARK: - Draft
 
@@ -197,24 +198,6 @@ struct ProfileView: View {
             isLoaded = true
             return
         }
-        
-        // 2) Профиля нет — создадим singleton
-        let new = UserProfile()
-        new.key = "UserProfileSingleton"
-        new.createdAt = .now
-        new.updatedAt = .now
-        
-        modelContext.insert(new)
-        
-        do {
-            try modelContext.save()
-            draft = UserProfileDraft(from: new)
-            isLoaded = true
-            errorMessage = nil
-        } catch {
-            isLoaded = false
-            errorMessage = "Не удалось создать профиль: \(error.localizedDescription)"
-        }
     }
     
     private func loadDraftFromProfile() {
@@ -250,6 +233,31 @@ struct ProfileView: View {
     }
 }
 
+struct ProfileViewPreviewWrapper: View {
+    let container: ModelContainer
+    @StateObject private var healthService = HealthKitDataService()
+    
+    init() {
+        // in-memory контейнер
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try! ModelContainer(for: UserProfile.self, configurations: config)
+        
+        let context = container.mainContext
+        
+        // тестовый профиль — подгони под свою модель
+        let profile = UserProfile()
+        //        profile.bmr = 1700
+        //        profile.tdee = 2600
+        context.insert(profile)
+    }
+    
+    var body: some View {
+        ProfileView()
+            .modelContainer(container)
+            .environmentObject(healthService)
+    }
+}
+
 #Preview {
-    ProfileView()
+    ProfileViewPreviewWrapper()
 }
