@@ -146,7 +146,9 @@ struct ProfileView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
             .navigationTitle("Профиль")
+            .appBackground()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Сброс") {
@@ -169,7 +171,7 @@ struct ProfileView: View {
                 }
             }
             .onAppear {
-                ensureProfileExistsThenLoadDraft()
+                loadDraft()
             }
         }
     }
@@ -191,12 +193,11 @@ struct ProfileView: View {
     
     // MARK: - Data
     
-    private func ensureProfileExistsThenLoadDraft() {
+    private func loadDraft() {
         // 1) Профиль уже есть — просто загрузим
         if let profile {
             draft = UserProfileDraft(from: profile)
             isLoaded = true
-            return
         }
     }
     
