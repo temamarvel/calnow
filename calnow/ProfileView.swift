@@ -6,11 +6,250 @@
 //
 
 import SwiftUI
+import SwiftData
 
+// MARK: - Draft
+
+struct UserProfileDraft: Equatable {
+    var sex: Sex
+    var age: Int
+    var height: Double
+    var weight: Double
+    var activity: ActivityLevel
+    
+    init(
+        sex: Sex = .male,
+        age: Int = 30,
+        height: Double = 170.0,
+        weight: Double = 80.0,
+        activity: ActivityLevel = .moderate
+    ) {
+        self.sex = sex
+        self.age = age
+        self.height = height
+        self.weight = weight
+        self.activity = activity
+    }
+    
+    init(from profile: UserProfile) {
+        self.sex = profile.sex
+        self.age = profile.age
+        self.height = profile.height
+        self.weight = profile.weight
+        self.activity = profile.activity
+    }
+    
+    // BMR по Миффлину—Сан Жеору
+    var bmr: Double {
+        let base = 10.0 * weight + 6.25 * height - 5.0 * Double(age)
+        return sex == .male ? (base + 5.0) : (base - 161.0)
+    }
+    
+    // TDEE
+    var tdee: Double { bmr * activity.multiplier }
+    
+    var isValid: Bool {
+        (10...100).contains(age)
+        && (120...230).contains(height)
+        && (30...250).contains(weight)
+    }
+}
+
+extension UserProfile {
+    func apply(_ draft: UserProfileDraft) {
+        sex = draft.sex
+        age = draft.age
+        height = draft.height
+        weight = draft.weight
+        activity = draft.activity
+        updatedAt = .now
+    }
+}
+
+// MARK: - View
 
 struct ProfileView: View {
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query private var profiles: [UserProfile]
+    
+    private var profile: UserProfile? { profiles.first }
+    
+    // Draft НЕ optional
+    @State private var draft = UserProfileDraft()
+    @State private var isLoaded = false
+    
+    @State private var errorMessage: String?
+    @State private var isSaving = false
     
     var body: some View {
-        Text("Профиль")
+        NavigationStack{
+            Form {
+                Section("Данные профиля") {
+                    if isLoaded {
+                        Picker("Пол", selection: $draft.sex) {
+                            ForEach(Sex.allCases) { s in
+                                Text(s.rawValue).tag(s)
+                            }
+                        }
+                        
+                        Stepper(value: $draft.age, in: 10...100, step: 1) {
+                            HStack {
+                                Text("Возраст")
+                                Spacer()
+                                Text("\(draft.age)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        Stepper(value: $draft.height, in: 120...230, step: 1) {
+                            HStack {
+                                Text("Рост")
+                                Spacer()
+                                Text("\(Int(draft.height)) см")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        Stepper(value: $draft.weight, in: 30...250, step: 0.5) {
+                            HStack {
+                                Text("Вес")
+                                Spacer()
+                                Text(String(format: "%.1f кг", draft.weight))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        
+                        Picker("Активность", selection: $draft.activity) {
+                            ForEach(ActivityLevel.allCases) { level in
+                                Text(level.rawValue).tag(level)
+                            }
+                        }
+                    } else {
+                        ProgressView("Загрузка…")
+                    }
+                }
+                
+                Section("Расчёты") {
+                    if isLoaded {
+                        LabeledContent("BMR") { Text("\(Int(draft.bmr)) ккал") }
+                        LabeledContent("TDEE") { Text("\(Int(draft.tdee)) ккал") }
+                    } else {
+                        Text("—").foregroundStyle(.secondary)
+                    }
+                }
+                
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage).foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("Профиль")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Сброс") {
+                        loadDraftFromProfile()
+                    }
+                    .disabled(!isLoaded || isSaving)
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        save()
+                    } label: {
+                        if isSaving {
+                            ProgressView()
+                        } else {
+                            Text("Сохранить")
+                        }
+                    }
+                    .disabled(!canSave)
+                }
+            }
+            .onAppear {
+                ensureProfileExistsThenLoadDraft()
+            }
+        }
     }
+    
+    // MARK: - Derived state
+    
+    private var canSave: Bool {
+        guard isLoaded else { return false }
+        guard draft.isValid else { return false }
+        guard profile != nil else { return false }
+        guard !isSaving else { return false }
+        
+        // Активируем кнопку только если есть изменения
+        if let profile {
+            return draft != UserProfileDraft(from: profile)
+        }
+        return false
+    }
+    
+    // MARK: - Data
+    
+    private func ensureProfileExistsThenLoadDraft() {
+        // 1) Профиль уже есть — просто загрузим
+        if let profile {
+            draft = UserProfileDraft(from: profile)
+            isLoaded = true
+            return
+        }
+        
+        // 2) Профиля нет — создадим singleton
+        let new = UserProfile()
+        new.key = "UserProfileSingleton"
+        new.createdAt = .now
+        new.updatedAt = .now
+        
+        modelContext.insert(new)
+        
+        do {
+            try modelContext.save()
+            draft = UserProfileDraft(from: new)
+            isLoaded = true
+            errorMessage = nil
+        } catch {
+            isLoaded = false
+            errorMessage = "Не удалось создать профиль: \(error.localizedDescription)"
+        }
+    }
+    
+    private func loadDraftFromProfile() {
+        guard let profile else { return }
+        draft = UserProfileDraft(from: profile)
+        errorMessage = nil
+    }
+    
+    private func save() {
+        guard let profile else {
+            errorMessage = "Профиль не найден."
+            return
+        }
+        guard isLoaded else { return }
+        guard draft.isValid else {
+            errorMessage = "Проверь введённые значения."
+            return
+        }
+        
+        isSaving = true
+        defer { isSaving = false }
+        
+        errorMessage = nil
+        profile.apply(draft)
+        
+        do {
+            try modelContext.save()
+            // Перезагрузим draft из сохранённой модели, чтобы гарантировать консистентность
+            self.draft = UserProfileDraft(from: profile)
+        } catch {
+            errorMessage = "Не удалось сохранить: \(error.localizedDescription)"
+        }
+    }
+}
+
+#Preview {
+    ProfileView()
 }
