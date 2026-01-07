@@ -140,21 +140,15 @@ struct ProfileView: View {
             .appBackground()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Сброс") {
+                    Button("Сброс", systemImage: "arrow.counterclockwise") {
                         loadDraft()
                     }
                     .disabled(!canReset)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+                    Button("Сохранить", systemImage: "checkmark") {
                         save()
-                    } label: {
-                        if isSaving {
-                            ProgressView()
-                        } else {
-                            Text("Сохранить")
-                        }
                     }
                     .disabled(!canSave)
                 }
