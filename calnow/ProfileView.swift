@@ -56,17 +56,6 @@ struct UserProfileDraft: Equatable {
     }
 }
 
-extension UserProfile {
-    func apply(_ draft: UserProfileDraft) {
-        sex = draft.sex
-        age = draft.age
-        height = draft.height
-        weight = draft.weight
-        activity = draft.activity
-        updatedAt = .now
-    }
-}
-
 // MARK: - View
 
 struct ProfileView: View {
@@ -94,7 +83,7 @@ struct ProfileView: View {
                             }
                         }
                         
-                        Stepper(value: $draft.age, in: 10...100, step: 1) {
+                        Stepper(value: $draft.age, in: 5...100, step: 1) {
                             HStack {
                                 Text("Возраст")
                                 Spacer()
@@ -140,10 +129,8 @@ struct ProfileView: View {
                     }
                 }
                 
-                if let errorMessage {
-                    Section {
-                        Text(errorMessage).foregroundStyle(.red)
-                    }
+                if let msg = validationMessage {
+                    Section { Text(msg).foregroundStyle(.red) }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -152,7 +139,7 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Сброс") {
-                        loadDraftFromProfile()
+                        loadDraft()
                     }
                     .disabled(!isLoaded || isSaving)
                 }
@@ -176,13 +163,18 @@ struct ProfileView: View {
         }
     }
     
+    private var validationMessage: String? {
+        if profile == nil { return "Профиль не найден." }
+        if !isLoaded { return "Черновик профиля не найден." }
+        if !draft.isValid { return "Проверь введённые значения." }
+        if isSaving { return "Идет сохранение данных профиля." }
+        return nil
+    }
+    
     // MARK: - Derived state
     
     private var canSave: Bool {
-        guard isLoaded else { return false }
-        guard draft.isValid else { return false }
-        guard profile != nil else { return false }
-        guard !isSaving else { return false }
+        guard validationMessage == nil else { return false }
         
         // Активируем кнопку только если есть изменения
         if let profile {
@@ -194,16 +186,12 @@ struct ProfileView: View {
     // MARK: - Data
     
     private func loadDraft() {
-        // 1) Профиль уже есть — просто загрузим
-        if let profile {
-            draft = UserProfileDraft(from: profile)
-            isLoaded = true
+        guard let profile else {
+            errorMessage = "Профиль не найден."
+            return
         }
-    }
-    
-    private func loadDraftFromProfile() {
-        guard let profile else { return }
         draft = UserProfileDraft(from: profile)
+        isLoaded = true
         errorMessage = nil
     }
     
@@ -212,7 +200,10 @@ struct ProfileView: View {
             errorMessage = "Профиль не найден."
             return
         }
-        guard isLoaded else { return }
+        guard isLoaded else {
+            errorMessage = "Черновик профиля не найден."
+            return
+        }
         guard draft.isValid else {
             errorMessage = "Проверь введённые значения."
             return
@@ -222,7 +213,8 @@ struct ProfileView: View {
         defer { isSaving = false }
         
         errorMessage = nil
-        profile.apply(draft)
+        
+        profile.update(with: draft)
         
         do {
             try modelContext.save()

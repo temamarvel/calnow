@@ -69,4 +69,13 @@ final class UserProfile {
     
     // Пример TDEE
     var tdee: Double { bmr * (activity.multiplier) }
+    
+    func update(with draftProfile: UserProfileDraft) {
+        sex = draftProfile.sex
+        age = draftProfile.age
+        height = draftProfile.height
+        weight = draftProfile.weight
+        activity = draftProfile.activity
+        updatedAt = .now
+    }
 }
