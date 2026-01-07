@@ -130,7 +130,9 @@ struct ProfileView: View {
                 }
                 
                 if let msg = validationMessage {
-                    Section { Text(msg).foregroundStyle(.appError) }
+                    Section("Ошибка") {
+                        Text(msg).foregroundStyle(.appError)
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
