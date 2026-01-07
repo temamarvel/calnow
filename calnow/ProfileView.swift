@@ -88,7 +88,7 @@ struct ProfileView: View {
                                 Text("Возраст")
                                 Spacer()
                                 Text("\(draft.age)")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(draft.isValid ? AnyShapeStyle(.secondary) : AnyShapeStyle(.appError))
                             }
                         }
                         
@@ -97,7 +97,7 @@ struct ProfileView: View {
                                 Text("Рост")
                                 Spacer()
                                 Text("\(Int(draft.height)) см")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(draft.isValid ? AnyShapeStyle(.secondary) : AnyShapeStyle(.appError))
                             }
                         }
                         
@@ -106,7 +106,7 @@ struct ProfileView: View {
                                 Text("Вес")
                                 Spacer()
                                 Text(String(format: "%.1f кг", draft.weight))
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(draft.isValid ? AnyShapeStyle(.secondary) : AnyShapeStyle(.appError))
                             }
                         }
                         
@@ -130,7 +130,7 @@ struct ProfileView: View {
                 }
                 
                 if let msg = validationMessage {
-                    Section { Text(msg).foregroundStyle(.red) }
+                    Section { Text(msg).foregroundStyle(.appError) }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -141,7 +141,7 @@ struct ProfileView: View {
                     Button("Сброс") {
                         loadDraft()
                     }
-                    .disabled(!isLoaded || isSaving)
+                    .disabled(!canReset)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -172,6 +172,10 @@ struct ProfileView: View {
     }
     
     // MARK: - Derived state
+    
+    private var canReset: Bool {
+        return !isLoaded || isSaving
+    }
     
     private var canSave: Bool {
         guard validationMessage == nil else { return false }
