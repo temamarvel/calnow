@@ -71,6 +71,7 @@ struct ProfileView: View {
     
     @State private var errorMessage: String?
     @State private var isSaving = false
+    @State private var saveOk: Bool? = nil
     
     var body: some View {
         NavigationStack{
@@ -156,7 +157,18 @@ struct ProfileView: View {
             .onAppear {
                 loadDraft()
             }
+            
+        }.safeAreaInset(edge: .top) {
+            if saveOk != nil {
+                ToastView(text: "Профиль сохранён.") {
+                    saveOk = nil
+                }
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
+        .animation(.easeOut(duration: 0.25), value: saveOk)
     }
     
     private var validationMessage: String? {
@@ -167,20 +179,28 @@ struct ProfileView: View {
         return nil
     }
     
+    private func validate() -> Bool{
+        return (profile != nil) && isLoaded && draft.isValid && !isSaving
+    }
+    
     // MARK: - Derived state
     
     private var canReset: Bool {
-        return !isLoaded || isSaving
+        return isLoaded && !isSaving && profileDataChanged
     }
     
-    private var canSave: Bool {
-        guard validationMessage == nil else { return false }
-        
-        // Активируем кнопку только если есть изменения
+    private var profileDataChanged: Bool {
         if let profile {
             return draft != UserProfileDraft(from: profile)
         }
         return false
+    }
+    
+    private var canSave: Bool {
+        guard validate() else { return false }
+        
+        // Активируем кнопку только если есть изменения
+        return profileDataChanged
     }
     
     // MARK: - Data
@@ -220,6 +240,7 @@ struct ProfileView: View {
             try modelContext.save()
             // Перезагрузим draft из сохранённой модели, чтобы гарантировать консистентность
             self.draft = UserProfileDraft(from: profile)
+            saveOk = true
         } catch {
             errorMessage = "Не удалось сохранить: \(error.localizedDescription)"
         }
