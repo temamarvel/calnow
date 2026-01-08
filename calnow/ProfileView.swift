@@ -142,7 +142,7 @@ struct ProfileView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        loadDraft()
+                        reset()
                     }
                     label: {
                         ToolbarCapsuleLabel(title: "Сброс", systemImage: "arrow.counterclockwise")
@@ -232,6 +232,10 @@ struct ProfileView: View {
         errorMessage = nil
     }
     
+    private func reset() {
+        loadDraft()
+    }
+    
     private func save() {
         guard let profile else {
             errorMessage = "Профиль не найден."
@@ -258,6 +262,8 @@ struct ProfileView: View {
             // Перезагрузим draft из сохранённой модели, чтобы гарантировать консистентность
             self.draft = UserProfileDraft(from: profile)
             saveOk = true
+            UINotificationFeedbackGenerator()
+                .notificationOccurred(.success)
         } catch {
             errorMessage = "Не удалось сохранить: \(error.localizedDescription)"
         }
