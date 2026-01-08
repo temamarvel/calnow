@@ -145,6 +145,12 @@ struct ProfileView: View {
                         loadDraft()
                     }
                     .disabled(!canReset)
+                    
+                    .legacyModifiers{ v in
+                        v.tint(.secondary)
+                         .buttonStyle(.bordered)
+                         .buttonBorderShape(.capsule)
+                    }
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -152,6 +158,12 @@ struct ProfileView: View {
                         save()
                     }
                     .disabled(!canSave)
+                    .tint(.secondary)
+                    .legacyModifiers{ v in
+                        v.tint(.secondary)
+                         .buttonStyle(.bordered)
+                         .buttonBorderShape(.capsule)
+                    }
                 }
             }
             .onAppear {
