@@ -141,29 +141,34 @@ struct ProfileView: View {
             .appBackground()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Сброс", systemImage: "arrow.counterclockwise") {
+                    Button {
                         loadDraft()
                     }
+                    label: {
+                        ToolbarCapsuleLabel(title: "Сброс", systemImage: "arrow.counterclockwise")
+                    }
                     .disabled(!canReset)
-                    
                     .legacyModifiers{ v in
                         v.tint(.secondary)
                          .buttonStyle(.bordered)
                          .buttonBorderShape(.capsule)
                     }
+                    .controlSize(.large)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Сохранить", systemImage: "checkmark") {
+                    Button {
                         save()
                     }
+                    label: {
+                        ToolbarCapsuleLabel(title: "Сохранить", systemImage: "checkmark")
+                    }
                     .disabled(!canSave)
-                    .tint(.secondary)
                     .legacyModifiers{ v in
                         v.tint(.secondary)
                          .buttonStyle(.bordered)
                          .buttonBorderShape(.capsule)
-                    }
+                    }.controlSize(.large)
                 }
             }
             .onAppear {
